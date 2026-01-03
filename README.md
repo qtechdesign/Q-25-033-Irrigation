@@ -76,7 +76,7 @@ Perfect for landscape architects, irrigation designers, and civil engineers who 
 
 3. **Load in AutoCAD**:
    - Type `APPLOAD` at the command line
-   - Browse to `lisp/qtech-irrigation.lsp`
+   - Browse to `lisp/qirri.lsp`
    - Click "Load"
 
 4. **Start using**:
