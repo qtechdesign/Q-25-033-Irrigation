@@ -1,10 +1,10 @@
 ================================================================================
-               QTECH DESIGN 2026 - IRRIGATION PLANNER
-                      Installation & User Guide
+                  QIRRI - INTELLIGENT IRRIGATION PLANNER
+                        Installation & User Guide
 ================================================================================
 
 Version: 1.0.0
-Copyright (c) 2026 QTech Design - Professional Irrigation Design Tools
+Copyright (c) 2026 QTech Design | info@qtech.hr | www.qtech.hr
 
 ================================================================================
                            INSTALLATION
@@ -12,14 +12,14 @@ Copyright (c) 2026 QTech Design - Professional Irrigation Design Tools
 
 METHOD 1: QUICK INSTALL
 -----------------------
-1. Copy the entire "QTech-Irrigation" folder to:
-   C:\QTech\Irrigation\
+1. Copy the entire "qirri" folder to:
+   C:\Qirri\
 
 2. Open AutoCAD
 
 3. Type APPLOAD at the command line
 
-4. Browse to: C:\QTech\Irrigation\lisp\qtech-irrigation.lsp
+4. Browse to: C:\Qirri\lisp\qirri.lsp
 
 5. Click "Load" - you should see the welcome message
 
@@ -32,16 +32,16 @@ METHOD 2: AUTO-LOAD ON STARTUP
 
 2. In APPLOAD dialog, click "Contents" under "Startup Suite"
 
-3. Click "Add" and select qtech-irrigation.lsp
+3. Click "Add" and select qirri.lsp
 
-4. Click "Close" - QTech will now load automatically when AutoCAD starts
+4. Click "Close" - Qirri will now load automatically when AutoCAD starts
 
 
 METHOD 3: CUSTOM LOCATION
 -------------------------
 1. Place files in your preferred location
 
-2. Edit qtech-irrigation.lsp and update the path detection if needed
+2. Edit qirri.lsp and update the path detection if needed
 
 3. Load using APPLOAD as above
 
@@ -50,20 +50,21 @@ METHOD 3: CUSTOM LOCATION
                            FILE STRUCTURE
 ================================================================================
 
-QTech-Irrigation/
+qirri/
 ├── lisp/
-│   ├── qtech-irrigation.lsp    <- Main file (load this one)
-│   ├── qtech-utils.lsp         <- Utility functions
-│   ├── qtech-catalogue.lsp     <- Sprinkler data
-│   ├── qtech-placement.lsp     <- Placement algorithms
-│   ├── qtech-patterns.lsp      <- Spray visualization
-│   ├── qtech-zones.lsp         <- Zone management
-│   └── qtech-boq.lsp           <- Bill of quantities
+│   ├── qirri.lsp               <- Main file (load this one)
+│   ├── qirri-utils.lsp         <- Utility functions
+│   ├── qirri-catalogue.lsp     <- Sprinkler data
+│   ├── qirri-simulation.lsp    <- Grid simulation & CU/DU
+│   ├── qirri-placement.lsp     <- Placement algorithms
+│   ├── qirri-genetic.lsp       <- Genetic algorithm optimizer
+│   ├── qirri-patterns.lsp      <- Spray visualization
+│   ├── qirri-zones.lsp         <- Zone management
+│   ├── qirri-boq.lsp           <- Bill of quantities
+│   └── qirri-reports.lsp       <- Water savings reports
 ├── data/
 │   ├── rainbird-catalogue.csv  <- Rain Bird sprinkler data
 │   └── hunter-catalogue.csv    <- Hunter sprinkler data
-├── blocks/
-│   └── (sprinkler blocks)      <- Custom blocks (optional)
 └── docs/
     └── installation.txt        <- This file
 
@@ -271,9 +272,11 @@ PATTERNS NOT SHOWING
 For support, feature requests, or bug reports:
 - Email: info@qtech.hr
 - Web: www.qtech.hr
+- GitHub: github.com/qtech-hr/qirri
 
 ================================================================================
-              Thank you for using QTech Design 2026 - Irrigation!
-       The World's Most Advanced Irrigation Planner for AutoCAD
+                      Thank you for using Qirri!
+          The World's Most Advanced Irrigation Planner for AutoCAD
+                           by QTech Design
 ================================================================================
 

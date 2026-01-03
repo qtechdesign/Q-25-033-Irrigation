@@ -1,8 +1,9 @@
-# QTech Design 2026 - Irrigation Planner
+# Qirri - Intelligent Irrigation Planner
 ## Advanced AutoLISP Application for AutoCAD
+### by QTech Design
 
 ## Project Overview
-**QTech Design 2026 - Irrigation** is the world's most advanced irrigation planner as an AutoLISP application for AutoCAD. The tool automates sprinkler placement within polyline-defined areas, optimizing for:
+**Qirri** is the world's most advanced irrigation planner as an AutoLISP application for AutoCAD. The tool automates sprinkler placement within polyline-defined areas, optimizing for:
 - **High Uniformity**: >90% Christiansen's Uniformity Coefficient (CU), >85% Distribution Uniformity (DU)
 - **Matched Precipitation**: 10-25 mm/hr to prevent runoff
 - **Maximum Water Savings**: 30-50% reduction vs. traditional designs
@@ -35,23 +36,21 @@
 
 ### File Structure
 ```
-QTech-Irrigation/
+qirri/
 ├── lisp/
-│   ├── qtech-irrigation.lsp      # Main loader and menu
-│   ├── qtech-utils.lsp           # Utility functions
-│   ├── qtech-catalogue.lsp       # Sprinkler catalogue data
-│   ├── qtech-simulation.lsp      # Grid simulation & CU/DU
-│   ├── qtech-placement.lsp       # Greedy placement algorithms
-│   ├── qtech-genetic.lsp         # Genetic algorithm optimizer
-│   ├── qtech-patterns.lsp        # Spray pattern visualization
-│   ├── qtech-zones.lsp           # Zone & flow management
-│   ├── qtech-boq.lsp             # Bill of quantities
-│   └── qtech-reports.lsp         # Water savings reports
+│   ├── qirri.lsp                 # Main loader and menu
+│   ├── qirri-utils.lsp           # Utility functions
+│   ├── qirri-catalogue.lsp       # Sprinkler catalogue data
+│   ├── qirri-simulation.lsp      # Grid simulation & CU/DU
+│   ├── qirri-placement.lsp       # Greedy placement algorithms
+│   ├── qirri-genetic.lsp         # Genetic algorithm optimizer
+│   ├── qirri-patterns.lsp        # Spray pattern visualization
+│   ├── qirri-zones.lsp           # Zone & flow management
+│   ├── qirri-boq.lsp             # Bill of quantities
+│   └── qirri-reports.lsp         # Water savings reports
 ├── data/
 │   ├── rainbird-catalogue.csv    # Rain Bird nozzle data
 │   └── hunter-catalogue.csv      # Hunter nozzle data
-├── blocks/
-│   └── sprinkler-blocks.dwg      # Attributed sprinkler blocks
 └── docs/
     └── installation.txt          # Installation guide
 ```
@@ -239,31 +238,31 @@ Hunter,MP Rotator,MP2000,5.2,0.07,10.0,2.8,"90,180,210,360",high,88
 
 ## Development Status
 - [x] Project specification (irrigation.md)
-- [x] Core utilities (qtech-utils.lsp)
-- [x] Catalogue system (qtech-catalogue.lsp)
-- [x] Grid simulation with CU/DU (qtech-simulation.lsp)
-- [x] Greedy placement algorithm (qtech-placement.lsp)
-- [x] Genetic algorithm optimizer (qtech-genetic.lsp)
-- [x] Spray pattern visualization (qtech-patterns.lsp)
-- [x] Zone management (qtech-zones.lsp)
-- [x] BOQ generation (qtech-boq.lsp)
-- [x] Water savings reporting (qtech-reports.lsp)
+- [x] Core utilities (qirri-utils.lsp)
+- [x] Catalogue system (qirri-catalogue.lsp)
+- [x] Grid simulation with CU/DU (qirri-simulation.lsp)
+- [x] Greedy placement algorithm (qirri-placement.lsp)
+- [x] Genetic algorithm optimizer (qirri-genetic.lsp)
+- [x] Spray pattern visualization (qirri-patterns.lsp)
+- [x] Zone management (qirri-zones.lsp)
+- [x] BOQ generation (qirri-boq.lsp)
+- [x] Water savings reporting (qirri-reports.lsp)
 - [x] Block attributes & visualization
 - [x] Rain Bird + Hunter catalogues
 
 ## File Summary
 | File | Lines | Description |
 |------|-------|-------------|
-| qtech-irrigation.lsp | ~450 | Main loader, menu, initialization |
-| qtech-utils.lsp | ~420 | Geometry, math, file utilities |
-| qtech-catalogue.lsp | ~400 | Sprinkler data, nozzle selection |
-| qtech-simulation.lsp | ~350 | Grid sim, CU/DU calculations |
-| qtech-placement.lsp | ~500 | Greedy perimeter+infill placement |
-| qtech-genetic.lsp | ~450 | GA optimizer (50-100 generations) |
-| qtech-patterns.lsp | ~260 | Spray visualization |
-| qtech-zones.lsp | ~350 | Zone/flow management |
-| qtech-boq.lsp | ~380 | Bill of quantities |
-| qtech-reports.lsp | ~300 | Water savings analysis |
+| qirri.lsp | ~450 | Main loader, menu, initialization |
+| qirri-utils.lsp | ~420 | Geometry, math, file utilities |
+| qirri-catalogue.lsp | ~400 | Sprinkler data, nozzle selection |
+| qirri-simulation.lsp | ~350 | Grid sim, CU/DU calculations |
+| qirri-placement.lsp | ~500 | Greedy perimeter+infill placement |
+| qirri-genetic.lsp | ~450 | GA optimizer (50-100 generations) |
+| qirri-patterns.lsp | ~260 | Spray visualization |
+| qirri-zones.lsp | ~350 | Zone/flow management |
+| qirri-boq.lsp | ~380 | Bill of quantities |
+| qirri-reports.lsp | ~300 | Water savings analysis |
 | **Total** | **~3,860** | Complete irrigation design system |
 
 ## Quick Reference
@@ -280,6 +279,7 @@ Hunter,MP Rotator,MP2000,5.2,0.07,10.0,2.8,"90,180,210,360",high,88
 ```
 
 ---
-*QTech Design 2026 - Irrigation Planner v1.0.0*
+*Qirri v1.0.0 - Intelligent Irrigation Planner by QTech Design*
 *The World's Most Advanced Irrigation Design System*
 *Hybrid Greedy-Genetic Algorithm | CU >90% | Water Savings 30-50%*
+*info@qtech.hr | www.qtech.hr*

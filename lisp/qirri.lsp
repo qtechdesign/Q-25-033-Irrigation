@@ -1,5 +1,5 @@
 ;;; ============================================================================
-;;; QTECH DESIGN 2026 - IRRIGATION PLANNER
+;;; QIRRI - Intelligent Irrigation Planner
 ;;; Professional Irrigation Design Automation for AutoCAD
 ;;; Copyright (c) 2026 QTech Design - All Rights Reserved
 ;;; Contact: info@qtech.hr | www.qtech.hr
@@ -11,15 +11,22 @@
 ;;; Global Variables
 ;;; ----------------------------------------------------------------------------
 
-(setq *qtech-version* "1.0.0")
-(setq *qtech-path* nil)
+(setq *qirri-version* "1.0.0")
+(setq *qirri-path* nil)
+(setq *qirri-catalogue* nil)
+(setq *qirri-settings* nil)
+(setq *qirri-current-area* nil)
+(setq *qirri-placements* nil)
+
+;; Aliases for backward compatibility
+(setq *qtech-version* *qirri-version*)
 (setq *qtech-catalogue* nil)
 (setq *qtech-settings* nil)
 (setq *qtech-current-area* nil)
 (setq *qtech-placements* nil)
 
 ;;; Default Settings
-(setq *qtech-default-settings*
+(setq *qirri-default-settings*
   '(("pressure" . 3.0)           ; Operating pressure (bar)
     ("max-flow" . 2.0)           ; Max flow per zone (m³/h)
     ("spacing-factor" . 0.55)    ; Head-to-head spacing factor (55% of radius)
@@ -36,59 +43,60 @@
     ("wind-factor" . 1.0)        ; Wind reduction factor (0.8-1.0)
   )
 )
+(setq *qtech-default-settings* *qirri-default-settings*)
 
 ;;; ----------------------------------------------------------------------------
 ;;; Path Detection and File Loading
 ;;; ----------------------------------------------------------------------------
 
 (defun qtech:get-path (/ doc path)
-  "Get the QTech installation path"
-  (if *qtech-path*
-    *qtech-path*
+  "Get the Qirri installation path"
+  (if *qirri-path*
+    *qirri-path*
     (progn
       ;; Try to find path from loaded file location
-      (setq path (findfile "qtech-irrigation.lsp"))
+      (setq path (findfile "qirri.lsp"))
       (if path
         (progn
-          (setq *qtech-path* (vl-filename-directory path))
-          *qtech-path*
+          (setq *qirri-path* (vl-filename-directory path))
+          *qirri-path*
         )
         ;; Default path
-        "C:\\QTech\\Irrigation\\lisp"
+        "C:\\Qirri\\lisp"
       )
     )
   )
 )
 
 (defun qtech:load-module (filename / filepath)
-  "Load a QTech LISP module"
+  "Load a Qirri LISP module"
   (setq filepath (strcat (qtech:get-path) "\\" filename))
   (if (findfile filepath)
     (progn
       (load filepath)
-      (princ (strcat "\n  Loaded: " filename))
+      (princ (strcat "\n  ✓ " filename))
       T
     )
     (progn
-      (princ (strcat "\n  ERROR: Cannot find " filepath))
+      (princ (strcat "\n  ✗ Cannot find: " filename))
       nil
     )
   )
 )
 
 (defun qtech:load-all-modules ()
-  "Load all QTech modules"
-  (princ "\n\nQTech Irrigation - Loading modules...")
-  (qtech:load-module "qtech-utils.lsp")
-  (qtech:load-module "qtech-catalogue.lsp")
-  (qtech:load-module "qtech-simulation.lsp")
-  (qtech:load-module "qtech-placement.lsp")
-  (qtech:load-module "qtech-genetic.lsp")
-  (qtech:load-module "qtech-patterns.lsp")
-  (qtech:load-module "qtech-zones.lsp")
-  (qtech:load-module "qtech-boq.lsp")
-  (qtech:load-module "qtech-reports.lsp")
-  (princ "\n  All modules loaded.\n")
+  "Load all Qirri modules"
+  (princ "\n\nLoading Qirri modules...")
+  (qtech:load-module "qirri-utils.lsp")
+  (qtech:load-module "qirri-catalogue.lsp")
+  (qtech:load-module "qirri-simulation.lsp")
+  (qtech:load-module "qirri-placement.lsp")
+  (qtech:load-module "qirri-genetic.lsp")
+  (qtech:load-module "qirri-patterns.lsp")
+  (qtech:load-module "qirri-zones.lsp")
+  (qtech:load-module "qirri-boq.lsp")
+  (qtech:load-module "qirri-reports.lsp")
+  (princ "\n")
 )
 
 ;;; ----------------------------------------------------------------------------
@@ -96,18 +104,27 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun qtech:initialize ()
-  "Initialize QTech Design 2026 - Irrigation system"
+  "Initialize Qirri Irrigation Planner"
   (princ "\n")
   (princ "╔══════════════════════════════════════════════════════════════╗\n")
-  (princ "║            QTECH DESIGN 2026 - IRRIGATION PLANNER           ║\n")
-  (princ "║                        Version ")
-  (princ *qtech-version*)
-  (princ "                        ║\n")
-  (princ "║    Professional Irrigation Design Automation for AutoCAD    ║\n")
+  (princ "║                                                              ║\n")
+  (princ "║              ██████╗ ██╗██████╗ ██████╗ ██╗                  ║\n")
+  (princ "║             ██╔═══██╗██║██╔══██╗██╔══██╗██║                  ║\n")
+  (princ "║             ██║   ██║██║██████╔╝██████╔╝██║                  ║\n")
+  (princ "║             ██║▄▄ ██║██║██╔══██╗██╔══██╗██║                  ║\n")
+  (princ "║             ╚██████╔╝██║██║  ██║██║  ██║██║                  ║\n")
+  (princ "║              ╚══▀▀═╝ ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝                  ║\n")
+  (princ "║                                                              ║\n")
+  (princ "║          Intelligent Irrigation Planner v")
+  (princ *qirri-version*)
+  (princ "                 ║\n")
+  (princ "║                    by QTech Design                          ║\n")
+  (princ "║                                                              ║\n")
   (princ "╚══════════════════════════════════════════════════════════════╝\n")
   
   ;; Load settings
-  (setq *qtech-settings* (qtech:copy-alist *qtech-default-settings*))
+  (setq *qirri-settings* (qtech:copy-alist *qirri-default-settings*))
+  (setq *qtech-settings* *qirri-settings*)
   
   ;; Load modules
   (qtech:load-all-modules)
@@ -117,14 +134,17 @@
   
   ;; Load catalogue
   (if (qtech:load-catalogue)
-    (princ (strcat "\n  Catalogue loaded: " 
-                   (itoa (length *qtech-catalogue*)) 
-                   " sprinkler entries\n"))
-    (princ "\n  WARNING: Could not load catalogue data\n")
+    (progn
+      (setq *qtech-catalogue* *qirri-catalogue*)
+      (princ (strcat "\n  Catalogue: " 
+                     (itoa (length *qirri-catalogue*)) 
+                     " sprinklers loaded\n"))
+    )
+    (princ "\n  ⚠ WARNING: Could not load catalogue data\n")
   )
   
-  (princ "\n  Type QIRR to open the main menu")
-  (princ "\n  Type QIRRHELP for command list\n\n")
+  (princ "\n  Type QIRR to start")
+  (princ "\n  Type QIRRHELP for commands\n\n")
   (princ)
 )
 
@@ -138,7 +158,7 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun c:QIRR (/ choice)
-  "Main QTech Irrigation menu"
+  "Main Qirri menu"
   (qtech:print-menu)
   (setq choice (strcase (getstring "\nEnter option [1-9/A-C/S/K/Q]: ")))
   (cond
@@ -156,7 +176,7 @@
     ((= choice "C") (c:QIRREXPORT))
     ((= choice "S") (c:QIRRSETTINGS))
     ((= choice "K") (c:QIRRCATALOGUE))
-    ((or (= choice "Q") (= choice "")) (princ "\nExiting QTech Irrigation."))
+    ((or (= choice "Q") (= choice "")) (princ "\nGoodbye from Qirri! 💧"))
     (T (princ "\nInvalid option.") (c:QIRR))
   )
   (princ)
@@ -164,12 +184,15 @@
 
 (defun c:QIRRFULL ()
   "Run full optimization: Greedy placement + GA refinement"
-  (princ "\n=== FULL AUTO OPTIMIZATION ===\n")
-  (princ "Phase 1: Greedy placement...\n")
+  (princ "\n")
+  (princ "╔══════════════════════════════════════════════════════════════╗\n")
+  (princ "║              QIRRI FULL AUTO OPTIMIZATION                    ║\n")
+  (princ "╚══════════════════════════════════════════════════════════════╝\n")
+  (princ "\n▶ Phase 1: Greedy placement...\n")
   (c:QIRRPLACE)
-  (princ "\nPhase 2: Genetic algorithm optimization...\n")
+  (princ "\n▶ Phase 2: Genetic algorithm refinement...\n")
   (c:QIRROPTIMIZE)
-  (princ "\nFull optimization complete.\n")
+  (princ "\n✓ Full optimization complete.\n")
   (princ)
 )
 
@@ -177,12 +200,12 @@
   "Print the main menu"
   (princ "\n")
   (princ "┌──────────────────────────────────────────────┐\n")
-  (princ "│      QTECH DESIGN 2026 - IRRIGATION         │\n")
+  (princ "│            QIRRI - MAIN MENU                 │\n")
   (princ "├──────────────────────────────────────────────┤\n")
   (princ "│  1. Select Irrigation Area                   │\n")
   (princ "│  2. Auto Place Sprinklers (Greedy)           │\n")
   (princ "│  3. Optimize Placement (Genetic Algorithm)   │\n")
-  (princ "│  4. Full Auto (Greedy + GA)                  │\n")
+  (princ "│  4. Full Auto (Greedy + GA) ⭐               │\n")
   (princ "│  5. Manual Placement Mode                    │\n")
   (princ "├──────────────────────────────────────────────┤\n")
   (princ "│  6. Draw Spray Patterns                      │\n")
@@ -194,9 +217,7 @@
   (princ "│  B. Water Savings Report                     │\n")
   (princ "│  C. Export Data                              │\n")
   (princ "├──────────────────────────────────────────────┤\n")
-  (princ "│  S. Settings                                 │\n")
-  (princ "│  K. Browse Catalogue                         │\n")
-  (princ "│  Q. Quit                                     │\n")
+  (princ "│  S. Settings  |  K. Catalogue  |  Q. Quit    │\n")
   (princ "└──────────────────────────────────────────────┘\n")
 )
 
@@ -206,31 +227,32 @@
 
 (defun c:QIRRSETTINGS (/ key val choice)
   "Display and modify project settings"
-  (princ "\n\n=== QTECH IRRIGATION SETTINGS ===\n")
+  (princ "\n\n=== QIRRI SETTINGS ===\n")
   (princ "Current settings:\n")
-  (foreach pair *qtech-settings*
+  (foreach pair *qirri-settings*
     (princ (strcat "  " (car pair) ": " (qtech:value-to-string (cdr pair)) "\n"))
   )
   (princ "\nEnter setting name to change (or ENTER to exit): ")
   (setq key (getstring))
   (if (and key (/= key ""))
     (progn
-      (if (assoc key *qtech-settings*)
+      (if (assoc key *qirri-settings*)
         (progn
-          (princ (strcat "Current value: " (qtech:value-to-string (cdr (assoc key *qtech-settings*)))))
+          (princ (strcat "Current value: " (qtech:value-to-string (cdr (assoc key *qirri-settings*)))))
           (princ "\nEnter new value: ")
           (setq val (getstring))
           (if (and val (/= val ""))
             (progn
-              (setq *qtech-settings* 
-                    (subst (cons key (qtech:parse-value val (cdr (assoc key *qtech-settings*))))
-                           (assoc key *qtech-settings*)
-                           *qtech-settings*))
-              (princ "\nSetting updated.")
+              (setq *qirri-settings* 
+                    (subst (cons key (qtech:parse-value val (cdr (assoc key *qirri-settings*))))
+                           (assoc key *qirri-settings*)
+                           *qirri-settings*))
+              (setq *qtech-settings* *qirri-settings*)
+              (princ "\n✓ Setting updated.")
             )
           )
         )
-        (princ "\nUnknown setting.")
+        (princ "\n✗ Unknown setting.")
       )
       (c:QIRRSETTINGS)
     )
@@ -270,40 +292,37 @@
   "Display help information"
   (princ "\n")
   (princ "╔══════════════════════════════════════════════════════════════════╗\n")
-  (princ "║                QTECH IRRIGATION - COMMANDS                       ║\n")
+  (princ "║                     QIRRI COMMANDS                               ║\n")
   (princ "╠══════════════════════════════════════════════════════════════════╣\n")
-  (princ "║  MAIN COMMANDS                                                   ║\n")
-  (princ "║  ─────────────                                                   ║\n")
-  (princ "║  QIRR          - Open main menu                                  ║\n")
-  (princ "║  QIRRAREA      - Select/define irrigation area                   ║\n")
-  (princ "║  QIRRPLACE     - Auto-place sprinklers (greedy algorithm)        ║\n")
-  (princ "║  QIRROPTIMIZE  - Run genetic algorithm optimization              ║\n")
-  (princ "║  QIRRFULL      - Full auto: greedy + GA optimization             ║\n")
-  (princ "║  QIRRMANUAL    - Manual sprinkler placement                      ║\n")
+  (princ "║  MAIN                                                            ║\n")
+  (princ "║  ────                                                            ║\n")
+  (princ "║  QIRR          - Main menu                                       ║\n")
+  (princ "║  QIRRAREA      - Select irrigation area                          ║\n")
+  (princ "║  QIRRPLACE     - Greedy placement algorithm                      ║\n")
+  (princ "║  QIRROPTIMIZE  - Genetic algorithm optimization                  ║\n")
+  (princ "║  QIRRFULL      - Full auto (greedy + GA) ⭐                      ║\n")
+  (princ "║  QIRRMANUAL    - Manual placement                                ║\n")
   (princ "╠══════════════════════════════════════════════════════════════════╣\n")
-  (princ "║  ANALYSIS & VISUALIZATION                                        ║\n")
-  (princ "║  ─────────────────────────                                       ║\n")
-  (princ "║  QIRRVALIDATE  - Validate uniformity (CU/DU metrics)             ║\n")
-  (princ "║  QIRRCOVERAGE  - Show coverage heatmap                           ║\n")
+  (princ "║  ANALYSIS                                                        ║\n")
+  (princ "║  ────────                                                        ║\n")
+  (princ "║  QIRRVALIDATE  - CU/DU uniformity metrics                        ║\n")
+  (princ "║  QIRRCOVERAGE  - Precipitation heatmap                           ║\n")
   (princ "║  QIRRPATTERN   - Draw spray patterns                             ║\n")
   (princ "║  QIRRGRID      - Show simulation grid                            ║\n")
   (princ "╠══════════════════════════════════════════════════════════════════╣\n")
-  (princ "║  REPORTING                                                       ║\n")
-  (princ "║  ─────────                                                       ║\n")
+  (princ "║  REPORTS                                                         ║\n")
+  (princ "║  ───────                                                         ║\n")
   (princ "║  QIRRZONE      - Zone management                                 ║\n")
-  (princ "║  QIRRBOQ       - Generate bill of quantities                     ║\n")
+  (princ "║  QIRRBOQ       - Bill of quantities                              ║\n")
   (princ "║  QIRRSAVINGS   - Water savings analysis                          ║\n")
-  (princ "║  QIRREXPORT    - Export data to CSV                              ║\n")
-  (princ "║  QIRRSTATS     - Quick project statistics                        ║\n")
+  (princ "║  QIRREXPORT    - Export to CSV                                   ║\n")
+  (princ "║  QIRRSTATS     - Quick statistics                                ║\n")
   (princ "╠══════════════════════════════════════════════════════════════════╣\n")
   (princ "║  UTILITIES                                                       ║\n")
   (princ "║  ─────────                                                       ║\n")
-  (princ "║  QIRRSETTINGS  - Project settings                                ║\n")
-  (princ "║  QIRRCATALOGUE - Browse sprinkler catalogue                      ║\n")
-  (princ "║  QIRRLAYERS    - Create irrigation layers                        ║\n")
-  (princ "║  QIRRUNITS     - Check/set drawing units                         ║\n")
-  (princ "║  QIRRVERSION   - Display version info                            ║\n")
-  (princ "║  QIRRHELP      - This help screen                                ║\n")
+  (princ "║  QIRRSETTINGS  - Settings     QIRRCATALOGUE - Sprinklers         ║\n")
+  (princ "║  QIRRLAYERS    - Layers       QIRRUNITS     - Units check        ║\n")
+  (princ "║  QIRRVERSION   - Version      QIRRHELP      - This help          ║\n")
   (princ "╚══════════════════════════════════════════════════════════════════╝\n")
   (princ)
 )
@@ -316,14 +335,23 @@
   "Display version information"
   (princ "\n")
   (princ "╔══════════════════════════════════════════════════════════════╗\n")
-  (princ (strcat "║         QTECH DESIGN 2026 - IRRIGATION PLANNER v" *qtech-version* "         ║\n"))
-  (princ "║    Professional Irrigation Design Automation for AutoCAD    ║\n")
   (princ "║                                                              ║\n")
-  (princ "║    • Hybrid Greedy-Genetic Algorithm Optimization           ║\n")
+  (princ "║              ██████╗ ██╗██████╗ ██████╗ ██╗                  ║\n")
+  (princ "║             ██╔═══██╗██║██╔══██╗██╔══██╗██║                  ║\n")
+  (princ "║             ██║   ██║██║██████╔╝██████╔╝██║                  ║\n")
+  (princ "║             ██║▄▄ ██║██║██╔══██╗██╔══██╗██║                  ║\n")
+  (princ "║             ╚██████╔╝██║██║  ██║██║  ██║██║                  ║\n")
+  (princ "║              ╚══▀▀═╝ ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝                  ║\n")
+  (princ "║                                                              ║\n")
+  (princ (strcat "║          Intelligent Irrigation Planner v" *qirri-version* "                 ║\n"))
+  (princ "║                                                              ║\n")
+  (princ "║    • Hybrid Greedy-Genetic Algorithm Optimization            ║\n")
   (princ "║    • Target CU >90%, DU >85%                                 ║\n")
   (princ "║    • Water Savings 30-50%                                    ║\n")
   (princ "║                                                              ║\n")
-  (princ "║    Copyright (c) 2026 QTech Design - All Rights Reserved    ║\n")
+  (princ "║    Copyright (c) 2026 QTech Design                           ║\n")
+  (princ "║    info@qtech.hr | www.qtech.hr                              ║\n")
+  (princ "║                                                              ║\n")
   (princ "╚══════════════════════════════════════════════════════════════╝\n")
   (princ)
 )
@@ -343,17 +371,17 @@
   
   (if (/= insunits 6) ; 6 = Meters
     (progn
-      (princ "\nWARNING: Drawing units are not set to Meters!")
-      (princ "\nQTech Irrigation requires metric units (meters).")
+      (princ "\n⚠ WARNING: Drawing units are not set to Meters!")
+      (princ "\nQirri requires metric units (meters).")
       (if (= "Y" (strcase (getstring "\nSet units to Meters? [Y/N]: ")))
         (progn
           (setvar "INSUNITS" 6)
           (setvar "LUNITS" 2) ; Decimal
-          (princ "\nUnits set to Meters (Decimal).")
+          (princ "\n✓ Units set to Meters (Decimal).")
         )
       )
     )
-    (princ "\nUnits are correctly set to Meters.")
+    (princ "\n✓ Units are correctly set to Meters.")
   )
   (princ)
 )
@@ -374,7 +402,7 @@
 (defun c:QIRRLAYERS ()
   "Create standard irrigation layers"
   (qtech:create-layers)
-  (princ "\nIrrigation layers created/verified.\n")
+  (princ "\n✓ Irrigation layers created/verified.\n")
   (princ)
 )
 
@@ -385,6 +413,5 @@
 (qtech:initialize)
 
 ;;; ============================================================================
-;;; End of qtech-irrigation.lsp
+;;; End of qirri.lsp
 ;;; ============================================================================
-

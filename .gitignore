@@ -1,18 +1,15 @@
-# Dependencies
-node_modules/
-.pnpm-store/
+# AutoCAD files
+*.dwg
+*.dwl
+*.dwl2
+*.bak
+*.sv$
+*.ac$
+*.dxf
 
-# Build outputs
-dist/
-build/
-.next/
-.turbo/
-
-# Environment
-.env
-.env.local
-.env.*.local
-.dev.vars
+# OS
+.DS_Store
+Thumbs.db
 
 # IDE
 .idea/
@@ -20,23 +17,13 @@ build/
 *.swp
 *.swo
 
-# OS
-.DS_Store
-Thumbs.db
+# Cursor
+.cursor/
 
 # Logs
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
-# Testing
-coverage/
-
-# Cloudflare
-.wrangler/
-
-# Supabase
-supabase/.branches/
-supabase/.temp/
+# Backup files
+*~
+*.orig
 
