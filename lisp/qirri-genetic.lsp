@@ -1,7 +1,7 @@
 ;;; ============================================================================
-;;; QTECH DESIGN 2026 - Genetic Algorithm Optimizer
+;;; QIRRI - Genetic Algorithm Optimizer
 ;;; Multi-objective GA for sprinkler placement optimization
-;;; Copyright (c) 2026 QTech Design - All Rights Reserved
+;;; Copyright (c) 2026 QTech Design - www.qtech.hr
 ;;; ============================================================================
 
 ;;; ----------------------------------------------------------------------------
@@ -227,7 +227,7 @@
        (and (= (strcase (qtech:cat-brand e)) (strcase brand))
             (= (strcase (qtech:cat-model e)) (strcase model))
             (= (strcase (qtech:cat-nozzle e)) (strcase nozzle))))
-    *qtech-catalogue*
+    (if *qirri-catalogue* *qirri-catalogue* *qtech-catalogue*)
   ))
 )
 
@@ -524,8 +524,9 @@
 )
 
 ;;; ============================================================================
-;;; End of qtech-genetic.lsp
+;;; End of qirri-genetic.lsp
 ;;; ============================================================================
 
+(princ "\n  qirri-genetic.lsp loaded")
 (princ)
 

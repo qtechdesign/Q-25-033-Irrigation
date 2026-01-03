@@ -1,6 +1,7 @@
 ;;; ============================================================================
-;;; QTECH IRRIGATION - Sprinkler Placement Algorithms
+;;; QIRRI - Sprinkler Placement Algorithms
 ;;; Automatic and manual placement functions
+;;; Copyright (c) 2026 QTech Design - www.qtech.hr
 ;;; ============================================================================
 
 ;;; ----------------------------------------------------------------------------
@@ -608,8 +609,9 @@
 )
 
 ;;; ============================================================================
-;;; End of qtech-placement.lsp
+;;; End of qirri-placement.lsp
 ;;; ============================================================================
 
+(princ "\n  qirri-placement.lsp loaded")
 (princ)
 

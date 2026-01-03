@@ -1,7 +1,7 @@
 ;;; ============================================================================
-;;; QTECH DESIGN 2026 - Simulation Grid & Uniformity Analysis
+;;; QIRRI - Simulation Grid & Uniformity Analysis
 ;;; Grid-based coverage simulation with CU/DU calculations
-;;; Copyright (c) 2026 QTech Design - All Rights Reserved
+;;; Copyright (c) 2026 QTech Design - www.qtech.hr
 ;;; ============================================================================
 
 ;;; ----------------------------------------------------------------------------
@@ -442,8 +442,9 @@
 )
 
 ;;; ============================================================================
-;;; End of qtech-simulation.lsp
+;;; End of qirri-simulation.lsp
 ;;; ============================================================================
 
+(princ "\n  qirri-simulation.lsp loaded")
 (princ)
 

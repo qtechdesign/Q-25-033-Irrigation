@@ -1,6 +1,7 @@
 ;;; ============================================================================
-;;; QTECH IRRIGATION - Spray Pattern Visualization
+;;; QIRRI - Spray Pattern Visualization
 ;;; Draw spray patterns (circles, arcs) for sprinkler heads
+;;; Copyright (c) 2026 QTech Design - www.qtech.hr
 ;;; ============================================================================
 
 ;;; ----------------------------------------------------------------------------
@@ -282,8 +283,9 @@
 )
 
 ;;; ============================================================================
-;;; End of qtech-patterns.lsp
+;;; End of qirri-patterns.lsp
 ;;; ============================================================================
 
+(princ "\n  qirri-patterns.lsp loaded")
 (princ)
 

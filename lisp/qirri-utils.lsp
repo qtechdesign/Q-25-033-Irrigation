@@ -1,6 +1,7 @@
 ;;; ============================================================================
-;;; QTECH IRRIGATION - Utility Functions
+;;; QIRRI - Utility Functions
 ;;; Common utilities, layer management, and helper functions
+;;; Copyright (c) 2026 QTech Design - www.qtech.hr
 ;;; ============================================================================
 
 ;;; ----------------------------------------------------------------------------
@@ -491,9 +492,24 @@
   (princ (strcat "\r" *qtech-progress-msg* " [100%] - Complete\n"))
 )
 
+;;; ----------------------------------------------------------------------------
+;;; Additional List Utilities
+;;; ----------------------------------------------------------------------------
+
+(defun qtech:list-take (lst n / result i)
+  "Take first n elements of a list"
+  (setq result '() i 0)
+  (while (and (< i n) (nth i lst))
+    (setq result (append result (list (nth i lst))))
+    (setq i (1+ i))
+  )
+  result
+)
+
 ;;; ============================================================================
-;;; End of qtech-utils.lsp
+;;; End of qirri-utils.lsp
 ;;; ============================================================================
 
+(princ "\n  qirri-utils.lsp loaded")
 (princ)
 

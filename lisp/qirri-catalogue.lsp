@@ -1,6 +1,7 @@
 ;;; ============================================================================
-;;; QTECH IRRIGATION - Sprinkler Catalogue
+;;; QIRRI - Sprinkler Catalogue
 ;;; Sprinkler data management and selection functions
+;;; Copyright (c) 2026 QTech Design - www.qtech.hr
 ;;; ============================================================================
 
 ;;; ----------------------------------------------------------------------------
@@ -23,10 +24,10 @@
     ("Rain Bird" "5004" "8.0"  11.3 0.76  24.0 3.0 (90 180 270 360) "standard")
     
     ;; Rain Bird 5000 High-Efficiency
-    ("Rain Bird" "5004" "HE-VAN-08"  2.4  0.04  10.0 2.1 (90 180 270 360) "high")
-    ("Rain Bird" "5004" "HE-VAN-10"  3.0  0.05  10.0 2.1 (90 180 270 360) "high")
-    ("Rain Bird" "5004" "HE-VAN-12"  3.7  0.06  10.0 2.1 (90 180 270 360) "high")
-    ("Rain Bird" "5004" "HE-VAN-15"  4.6  0.08  10.0 2.1 (90 180 270 360) "high")
+    ("Rain Bird" "5004-HE" "VAN-08"  2.4  0.04  10.0 2.1 (90 180 270 360) "high")
+    ("Rain Bird" "5004-HE" "VAN-10"  3.0  0.05  10.0 2.1 (90 180 270 360) "high")
+    ("Rain Bird" "5004-HE" "VAN-12"  3.7  0.06  10.0 2.1 (90 180 270 360) "high")
+    ("Rain Bird" "5004-HE" "VAN-15"  4.6  0.08  10.0 2.1 (90 180 270 360) "high")
     
     ;; Rain Bird 3500 Series
     ("Rain Bird" "3504" "0.5"  3.0  0.05  11.0 2.8 (90 180 270 360) "standard")
@@ -35,52 +36,52 @@
     ("Rain Bird" "3504" "2.0"  5.8  0.14  15.0 2.8 (90 180 270 360) "standard")
     
     ;; Rain Bird R-VAN Rotary Nozzles (High Efficiency)
-    ("Rain Bird" "R-VAN" "14"   2.4-4.3 0.06  10.0 2.1 (90 180 270 360) "high")
-    ("Rain Bird" "R-VAN" "18"   4.0-5.5 0.08  10.0 2.1 (90 180 270 360) "high")
-    ("Rain Bird" "R-VAN" "24"   5.5-7.3 0.11  10.0 2.1 (90 180 270 360) "high")
+    ("Rain Bird" "R-VAN" "14"   3.4 0.06  10.0 2.1 (90 180 270 360) "high")
+    ("Rain Bird" "R-VAN" "18"   4.8 0.08  10.0 2.1 (90 180 270 360) "high")
+    ("Rain Bird" "R-VAN" "24"   6.4 0.11  10.0 2.1 (90 180 270 360) "high")
     
     ;; Rain Bird 1800 Pop-up Spray Heads
-    ("Rain Bird" "1804" "4VAN"   1.2  0.02  35.0 2.1 (0 90 180 270 360) "standard")
-    ("Rain Bird" "1804" "6VAN"   1.8  0.03  35.0 2.1 (0 90 180 270 360) "standard")
-    ("Rain Bird" "1804" "8VAN"   2.4  0.05  38.0 2.1 (0 90 180 270 360) "standard")
-    ("Rain Bird" "1804" "10VAN"  3.0  0.07  40.0 2.1 (0 90 180 270 360) "standard")
-    ("Rain Bird" "1804" "12VAN"  3.7  0.10  42.0 2.1 (0 90 180 270 360) "standard")
-    ("Rain Bird" "1804" "15VAN"  4.6  0.14  45.0 2.1 (0 90 180 270 360) "standard")
+    ("Rain Bird" "1804" "4VAN"   1.2  0.02  35.0 2.1 (90 180 270 360) "standard")
+    ("Rain Bird" "1804" "6VAN"   1.8  0.03  35.0 2.1 (90 180 270 360) "standard")
+    ("Rain Bird" "1804" "8VAN"   2.4  0.05  38.0 2.1 (90 180 270 360) "standard")
+    ("Rain Bird" "1804" "10VAN"  3.0  0.07  40.0 2.1 (90 180 270 360) "standard")
+    ("Rain Bird" "1804" "12VAN"  3.7  0.10  42.0 2.1 (90 180 270 360) "standard")
+    ("Rain Bird" "1804" "15VAN"  4.6  0.14  45.0 2.1 (90 180 270 360) "standard")
     
     ;; Hunter PGP Series Rotors
-    ("Hunter" "PGP-ADJ" "1.0"  4.9  0.10  13.0 3.5 (50 360) "standard")
-    ("Hunter" "PGP-ADJ" "1.5"  5.8  0.14  14.0 3.5 (50 360) "standard")
-    ("Hunter" "PGP-ADJ" "2.0"  6.7  0.17  15.0 3.5 (50 360) "standard")
-    ("Hunter" "PGP-ADJ" "3.0"  8.2  0.27  16.0 3.5 (50 360) "standard")
-    ("Hunter" "PGP-ADJ" "4.0"  9.4  0.38  17.0 3.5 (50 360) "standard")
-    ("Hunter" "PGP-ADJ" "5.0"  10.4 0.50  18.0 3.5 (50 360) "standard")
-    ("Hunter" "PGP-ADJ" "6.0"  11.6 0.65  20.0 3.5 (50 360) "standard")
-    ("Hunter" "PGP-ADJ" "8.0"  13.1 0.91  22.0 3.5 (50 360) "standard")
+    ("Hunter" "PGP-ADJ" "1.0"  4.9  0.10  13.0 3.5 (90 180 270 360) "standard")
+    ("Hunter" "PGP-ADJ" "1.5"  5.8  0.14  14.0 3.5 (90 180 270 360) "standard")
+    ("Hunter" "PGP-ADJ" "2.0"  6.7  0.17  15.0 3.5 (90 180 270 360) "standard")
+    ("Hunter" "PGP-ADJ" "3.0"  8.2  0.27  16.0 3.5 (90 180 270 360) "standard")
+    ("Hunter" "PGP-ADJ" "4.0"  9.4  0.38  17.0 3.5 (90 180 270 360) "standard")
+    ("Hunter" "PGP-ADJ" "5.0"  10.4 0.50  18.0 3.5 (90 180 270 360) "standard")
+    ("Hunter" "PGP-ADJ" "6.0"  11.6 0.65  20.0 3.5 (90 180 270 360) "standard")
+    ("Hunter" "PGP-ADJ" "8.0"  13.1 0.91  22.0 3.5 (90 180 270 360) "standard")
     
     ;; Hunter PGJ Series (Smaller Rotors)
-    ("Hunter" "PGJ" "Red"    5.2  0.12  14.0 2.8 (50 360) "standard")
-    ("Hunter" "PGJ" "Green"  6.4  0.17  15.0 2.8 (50 360) "standard")
-    ("Hunter" "PGJ" "Black"  7.6  0.23  16.0 2.8 (50 360) "standard")
-    ("Hunter" "PGJ" "Gray"   8.5  0.30  17.0 2.8 (50 360) "standard")
+    ("Hunter" "PGJ" "Red"    5.2  0.12  14.0 2.8 (90 180 270 360) "standard")
+    ("Hunter" "PGJ" "Green"  6.4  0.17  15.0 2.8 (90 180 270 360) "standard")
+    ("Hunter" "PGJ" "Black"  7.6  0.23  16.0 2.8 (90 180 270 360) "standard")
+    ("Hunter" "PGJ" "Gray"   8.5  0.30  17.0 2.8 (90 180 270 360) "standard")
     
     ;; Hunter MP Rotator (High Efficiency)
-    ("Hunter" "MP Rotator" "MP1000-90"   2.4-4.5 0.04 10.0 2.8 (90) "high")
-    ("Hunter" "MP Rotator" "MP1000-210"  2.4-4.5 0.04 10.0 2.8 (210) "high")
-    ("Hunter" "MP Rotator" "MP1000-360"  2.4-4.5 0.04 10.0 2.8 (360) "high")
-    ("Hunter" "MP Rotator" "MP2000-90"   4.0-6.4 0.07 10.0 2.8 (90) "high")
-    ("Hunter" "MP Rotator" "MP2000-210"  4.0-6.4 0.07 10.0 2.8 (210) "high")
-    ("Hunter" "MP Rotator" "MP2000-360"  4.0-6.4 0.07 10.0 2.8 (360) "high")
-    ("Hunter" "MP Rotator" "MP3000-90"   6.4-9.1 0.11 10.0 2.8 (90) "high")
-    ("Hunter" "MP Rotator" "MP3000-210"  6.4-9.1 0.11 10.0 2.8 (210) "high")
-    ("Hunter" "MP Rotator" "MP3000-360"  6.4-9.1 0.11 10.0 2.8 (360) "high")
-    ("Hunter" "MP Rotator" "MP3500-90"   9.1-10.7 0.14 10.0 2.8 (90) "high")
-    ("Hunter" "MP Rotator" "MP3500-210"  9.1-10.7 0.14 10.0 2.8 (210) "high")
-    ("Hunter" "MP Rotator" "MP3500-360"  9.1-10.7 0.14 10.0 2.8 (360) "high")
+    ("Hunter" "MP1000" "90"   3.5 0.04 10.0 2.8 (90) "high")
+    ("Hunter" "MP1000" "210"  3.5 0.04 10.0 2.8 (210) "high")
+    ("Hunter" "MP1000" "360"  3.5 0.04 10.0 2.8 (360) "high")
+    ("Hunter" "MP2000" "90"   5.2 0.07 10.0 2.8 (90) "high")
+    ("Hunter" "MP2000" "210"  5.2 0.07 10.0 2.8 (210) "high")
+    ("Hunter" "MP2000" "360"  5.2 0.07 10.0 2.8 (360) "high")
+    ("Hunter" "MP3000" "90"   7.8 0.11 10.0 2.8 (90) "high")
+    ("Hunter" "MP3000" "210"  7.8 0.11 10.0 2.8 (210) "high")
+    ("Hunter" "MP3000" "360"  7.8 0.11 10.0 2.8 (360) "high")
+    ("Hunter" "MP3500" "90"   9.9 0.14 10.0 2.8 (90) "high")
+    ("Hunter" "MP3500" "210"  9.9 0.14 10.0 2.8 (210) "high")
+    ("Hunter" "MP3500" "360"  9.9 0.14 10.0 2.8 (360) "high")
     
     ;; Hunter MP Side Strip
-    ("Hunter" "MP Rotator" "MPSS530"  1.5-4.6 0.05 10.0 2.8 (180) "high")
-    ("Hunter" "MP Rotator" "MPLCS515" 1.5-4.6 0.04 10.0 2.8 (180) "high")
-    ("Hunter" "MP Rotator" "MPRCS515" 1.5-4.6 0.04 10.0 2.8 (180) "high")
+    ("Hunter" "MP-SS" "530"   3.0 0.05 10.0 2.8 (180) "high")
+    ("Hunter" "MP-LCS" "515"  3.0 0.04 10.0 2.8 (180) "high")
+    ("Hunter" "MP-RCS" "515"  3.0 0.04 10.0 2.8 (180) "high")
     
     ;; Hunter Pro-Spray Fixed Spray
     ("Hunter" "Pro-Spray" "4A"    1.2  0.02  38.0 2.1 (360) "standard")
@@ -97,12 +98,12 @@
     ("Hunter" "Pro-Spray" "8H"    2.4  0.03  42.0 2.1 (180) "standard")
     
     ;; Hunter I-20 Series (Large Rotors)
-    ("Hunter" "I-20" "Blue"   8.5  0.25  14.0 3.5 (50 360) "standard")
-    ("Hunter" "I-20" "Green"  10.1 0.36  15.0 3.5 (50 360) "standard")
-    ("Hunter" "I-20" "Yellow" 11.6 0.48  16.0 3.5 (50 360) "standard")
-    ("Hunter" "I-20" "Red"    13.1 0.63  17.0 3.5 (50 360) "standard")
-    ("Hunter" "I-20" "Gray"   14.3 0.80  18.0 3.5 (50 360) "standard")
-    ("Hunter" "I-20" "Black"  15.5 1.00  19.0 3.5 (50 360) "standard")
+    ("Hunter" "I-20" "Blue"   8.5  0.25  14.0 3.5 (90 180 270 360) "standard")
+    ("Hunter" "I-20" "Green"  10.1 0.36  15.0 3.5 (90 180 270 360) "standard")
+    ("Hunter" "I-20" "Yellow" 11.6 0.48  16.0 3.5 (90 180 270 360) "standard")
+    ("Hunter" "I-20" "Red"    13.1 0.63  17.0 3.5 (90 180 270 360) "standard")
+    ("Hunter" "I-20" "Gray"   14.3 0.80  18.0 3.5 (90 180 270 360) "standard")
+    ("Hunter" "I-20" "Black"  15.5 1.00  19.0 3.5 (90 180 270 360) "standard")
   )
 )
 
@@ -112,16 +113,18 @@
 
 (defun qtech:load-catalogue ()
   "Load sprinkler catalogue (built-in + external if available)"
-  (setq *qtech-catalogue* (qtech:get-default-catalogue))
+  (setq *qirri-catalogue* (qtech:get-default-catalogue))
+  (setq *qtech-catalogue* *qirri-catalogue*)
   ;; Try to load external CSV files
   (qtech:load-external-catalogue "rainbird-catalogue.csv")
   (qtech:load-external-catalogue "hunter-catalogue.csv")
-  *qtech-catalogue*
+  *qirri-catalogue*
 )
 
-(defun qtech:load-external-catalogue (filename / filepath data header)
+(defun qtech:load-external-catalogue (filename / filepath data header sep)
   "Load additional catalogue entries from CSV file"
-  (setq filepath (strcat (qtech:get-path) "\\..\\data\\" filename))
+  (setq sep (qirri:get-separator))
+  (setq filepath (strcat (qirri:get-path) sep ".." sep "data" sep filename))
   (if (findfile filepath)
     (progn
       (setq data (qtech:read-csv-file filepath))
@@ -129,11 +132,12 @@
         (progn
           (foreach row (cdr data)
             (if (>= (length row) 9)
-              (setq *qtech-catalogue* 
-                    (append *qtech-catalogue* 
+              (setq *qirri-catalogue* 
+                    (append *qirri-catalogue* 
                             (list (qtech:csv-row-to-entry row))))
             )
           )
+          (setq *qtech-catalogue* *qirri-catalogue*)
           (princ (strcat "\n  Loaded external: " filename))
           T
         )
@@ -266,10 +270,19 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun qtech:select-best-nozzle (target-radius arc system-pressure target-precip prefer-brand prefer-eff
-                                  / candidates scored best)
+                                  / candidates scored best brand-filtered eff-filtered sorted)
   "Select the best nozzle for given requirements"
   ;; Start with full catalogue
-  (setq candidates *qtech-catalogue*)
+  (setq candidates *qirri-catalogue*)
+  
+  (if (not candidates)
+    (progn
+      (princ "\n[!!] Catalogue empty - loading defaults...")
+      (setq candidates (qtech:get-default-catalogue))
+      (setq *qirri-catalogue* candidates)
+      (setq *qtech-catalogue* candidates)
+    )
+  )
   
   ;; Filter by pressure
   (setq candidates (qtech:filter-by-pressure candidates system-pressure))
@@ -344,8 +357,8 @@
 
 (defun c:QIRRCATALOGUE (/ brand filter-rad entries i entry)
   "Browse sprinkler catalogue"
-  (princ "\n\n=== QTECH SPRINKLER CATALOGUE ===\n")
-  (princ (strcat "Total entries: " (itoa (length *qtech-catalogue*)) "\n\n"))
+  (princ "\n\n=== QIRRI SPRINKLER CATALOGUE ===\n")
+  (princ (strcat "Total entries: " (itoa (length *qirri-catalogue*)) "\n\n"))
   
   ;; Filter options
   (princ "Filter by brand (ENTER for all): ")
@@ -356,7 +369,7 @@
   (setq filter-rad (getstring))
   
   ;; Apply filters
-  (setq entries (qtech:filter-by-brand *qtech-catalogue* brand))
+  (setq entries (qtech:filter-by-brand *qirri-catalogue* brand))
   (if (and filter-rad (/= filter-rad ""))
     (setq entries (qtech:filter-by-radius-range entries 0.0 (atof filter-rad)))
   )
@@ -366,10 +379,10 @@
   
   ;; Display results
   (princ (strcat "\nShowing " (itoa (length entries)) " entries:\n"))
-  (princ "─────────────────────────────────────────────────────────────────────────\n")
+  (princ "-------------------------------------------------------------------------\n")
   (princ "Brand       Model       Nozzle       Radius  Flow    Precip  Press  Eff\n")
-  (princ "                                     (m)     (m³/h)  (mm/h)  (bar)\n")
-  (princ "─────────────────────────────────────────────────────────────────────────\n")
+  (princ "                                     (m)     (m3/h)  (mm/h)  (bar)\n")
+  (princ "-------------------------------------------------------------------------\n")
   
   (setq i 0)
   (foreach entry (if (> (length entries) 30) 
@@ -383,7 +396,7 @@
     (princ (strcat "\n... and " (itoa (- (length entries) 30)) " more entries\n"))
   )
   
-  (princ "─────────────────────────────────────────────────────────────────────────\n")
+  (princ "-------------------------------------------------------------------------\n")
   (princ)
 )
 
@@ -415,8 +428,8 @@
 )
 
 ;;; ============================================================================
-;;; End of qtech-catalogue.lsp
+;;; End of qirri-catalogue.lsp
 ;;; ============================================================================
 
+(princ "\n  qirri-catalogue.lsp loaded")
 (princ)
-

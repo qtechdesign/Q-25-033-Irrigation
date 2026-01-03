@@ -1,6 +1,7 @@
 ;;; ============================================================================
-;;; QTECH IRRIGATION - Water Savings & Performance Reports
+;;; QIRRI - Water Savings & Performance Reports
 ;;; Comprehensive reporting and analysis functions
+;;; Copyright (c) 2026 QTech Design - www.qtech.hr
 ;;; ============================================================================
 
 ;;; ----------------------------------------------------------------------------
@@ -338,8 +339,9 @@
 )
 
 ;;; ============================================================================
-;;; End of qtech-reports.lsp
+;;; End of qirri-reports.lsp
 ;;; ============================================================================
 
+(princ "\n  qirri-reports.lsp loaded")
 (princ)
 
