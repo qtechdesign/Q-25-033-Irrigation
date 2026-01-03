@@ -1,0 +1,279 @@
+================================================================================
+               QTECH DESIGN 2026 - IRRIGATION PLANNER
+                      Installation & User Guide
+================================================================================
+
+Version: 1.0.0
+Copyright (c) 2026 QTech Design - Professional Irrigation Design Tools
+
+================================================================================
+                           INSTALLATION
+================================================================================
+
+METHOD 1: QUICK INSTALL
+-----------------------
+1. Copy the entire "QTech-Irrigation" folder to:
+   C:\QTech\Irrigation\
+
+2. Open AutoCAD
+
+3. Type APPLOAD at the command line
+
+4. Browse to: C:\QTech\Irrigation\lisp\qtech-irrigation.lsp
+
+5. Click "Load" - you should see the welcome message
+
+6. Type QIRR to open the main menu
+
+
+METHOD 2: AUTO-LOAD ON STARTUP
+------------------------------
+1. Follow steps 1-3 above
+
+2. In APPLOAD dialog, click "Contents" under "Startup Suite"
+
+3. Click "Add" and select qtech-irrigation.lsp
+
+4. Click "Close" - QTech will now load automatically when AutoCAD starts
+
+
+METHOD 3: CUSTOM LOCATION
+-------------------------
+1. Place files in your preferred location
+
+2. Edit qtech-irrigation.lsp and update the path detection if needed
+
+3. Load using APPLOAD as above
+
+
+================================================================================
+                           FILE STRUCTURE
+================================================================================
+
+QTech-Irrigation/
+├── lisp/
+│   ├── qtech-irrigation.lsp    <- Main file (load this one)
+│   ├── qtech-utils.lsp         <- Utility functions
+│   ├── qtech-catalogue.lsp     <- Sprinkler data
+│   ├── qtech-placement.lsp     <- Placement algorithms
+│   ├── qtech-patterns.lsp      <- Spray visualization
+│   ├── qtech-zones.lsp         <- Zone management
+│   └── qtech-boq.lsp           <- Bill of quantities
+├── data/
+│   ├── rainbird-catalogue.csv  <- Rain Bird sprinkler data
+│   └── hunter-catalogue.csv    <- Hunter sprinkler data
+├── blocks/
+│   └── (sprinkler blocks)      <- Custom blocks (optional)
+└── docs/
+    └── installation.txt        <- This file
+
+
+================================================================================
+                             COMMANDS
+================================================================================
+
+MAIN COMMANDS
+-------------
+QIRR           Open main menu (start here!)
+QIRRAREA       Select irrigation area polyline
+QIRRPLACE      Auto-place sprinklers (greedy algorithm)
+QIRROPTIMIZE   Run genetic algorithm optimization
+QIRRFULL       Full auto: greedy + GA optimization
+QIRRMANUAL     Manual placement mode
+
+ANALYSIS COMMANDS
+-----------------
+QIRRVALIDATE   Validate uniformity (CU/DU metrics)
+QIRRCOVERAGE   Show precipitation heatmap
+QIRRPATTERN    Draw spray patterns
+QIRRGRID       Show simulation grid
+
+REPORTING COMMANDS
+------------------
+QIRRZONE       Zone management
+QIRRBOQ        Generate bill of quantities
+QIRRSAVINGS    Water savings analysis
+QIRREXPORT     Export data to CSV
+QIRRSTATS      Quick project statistics
+
+UTILITY COMMANDS
+----------------
+QIRRSETTINGS   Modify project settings
+QIRRCATALOGUE  Browse sprinkler catalogue
+QIRRLAYERS     Create irrigation layers
+QIRRUNITS      Check/set units to meters
+QIRRVERSION    Display version info
+QIRRHELP       Show command list
+
+
+================================================================================
+                          QUICK START GUIDE
+================================================================================
+
+STEP 1: PREPARE YOUR DRAWING
+----------------------------
+- Open your site plan in AutoCAD
+- Make sure units are set to METERS (run QIRRUNITS to check)
+- Draw a CLOSED POLYLINE around the irrigation area
+- Important: The polyline MUST be closed!
+
+STEP 2: SELECT THE AREA
+-----------------------
+- Type QIRRAREA
+- Click on your closed polyline
+- Review the area statistics displayed
+
+STEP 3: CONFIGURE SETTINGS (OPTIONAL)
+-------------------------------------
+- Type QIRRSETTINGS to view/change:
+  - pressure: System pressure in bar (default: 3.0)
+  - max-flow: Max flow per zone in m³/h (default: 2.0)
+  - target-precip: Target precipitation rate mm/hr (default: 15.0)
+  - preferred-brand: "rainbird", "hunter", or "any"
+  - efficiency-priority: Yes/No for high-efficiency nozzles
+
+STEP 4: AUTO-PLACE SPRINKLERS (GREEDY ALGORITHM)
+------------------------------------------------
+- Type QIRRPLACE
+- Algorithm runs in phases:
+  Phase 1: Perimeter-first placement (minimizes overspray)
+  Phase 2: Inward puzzle-like infill (fills gaps)
+  Phase 3: Coverage validation (CU/DU check)
+- Review the summary (total heads, flow, uniformity)
+
+STEP 5: OPTIMIZE WITH GENETIC ALGORITHM (OPTIONAL)
+--------------------------------------------------
+- Type QIRROPTIMIZE for GA refinement
+- Or type QIRRFULL for complete auto (greedy + GA)
+- GA evolves placement over 50-100 generations
+- Targets: CU >90%, DU >85%, maximize water savings
+
+STEP 6: VALIDATE UNIFORMITY
+---------------------------
+- Type QIRRVALIDATE to see detailed metrics
+- Christiansen's Uniformity (CU) - target >90%
+- Distribution Uniformity (DU) - target >85%
+- Coverage percentage - target >95%
+
+STEP 7: VISUALIZE COVERAGE
+--------------------------
+- Type QIRRPATTERN to draw spray patterns
+- Type QIRRCOVERAGE for precipitation heatmap
+- Colors show under/over-watered areas
+
+STEP 8: MANAGE ZONES
+--------------------
+- Type QIRRZONE
+- Auto-zone by flow (respects max m³/h per line)
+- Or auto-zone by proximity (spatial clustering)
+
+STEP 9: GENERATE REPORTS
+------------------------
+- Type QIRRBOQ for bill of quantities
+- Type QIRRSAVINGS for water savings analysis
+- Compare optimized vs. baseline water usage
+- Export to CSV for external use
+
+
+================================================================================
+                              LAYERS
+================================================================================
+
+QTech creates these layers automatically:
+
+IRR-AREA        Gray (8)     - Irrigation boundaries
+IRR-OBSTACLE    Red (1)      - Obstacles/exclusions
+IRR-SPRINKLER   Green (3)    - Sprinkler head symbols
+IRR-PATTERN     Cyan (4)     - Spray patterns
+IRR-PIPE-MAIN   Blue (5)     - Main line piping
+IRR-PIPE-LAT    Magenta (6)  - Lateral piping
+IRR-VALVE       Yellow (2)   - Valves
+IRR-ZONE-1..10  Various      - Zone-specific elements
+IRR-TEXT        White (7)    - Labels
+IRR-DIM         White (7)    - Dimensions
+
+
+================================================================================
+                               UNITS
+================================================================================
+
+QTech Irrigation uses SI units exclusively:
+
+- Length: meters (m)
+- Area: square meters (m²)
+- Flow: cubic meters per hour (m³/h)
+- Precipitation: millimeters per hour (mm/hr)
+- Pressure: bar
+- Arc angles: degrees (°)
+
+IMPORTANT: Set your drawing to meters before starting!
+Run QIRRUNITS to check and fix units.
+
+
+================================================================================
+                              TIPS
+================================================================================
+
+1. CLOSED POLYLINES
+   The area polyline MUST be closed. Use PEDIT > Close if needed.
+
+2. COMPLEX SHAPES
+   The algorithm handles irregular shapes well. For very complex
+   areas, consider breaking into multiple zones.
+
+3. OBSTACLES
+   Draw obstacles as separate closed polylines on IRR-OBSTACLE layer.
+   (Future feature: automatic obstacle detection)
+
+4. MANUAL TWEAKS
+   After auto-placement, use QIRRMANUAL to add/adjust heads.
+   Lock important heads before re-running optimization.
+
+5. ZONE FLOW
+   Check that no zone exceeds your system's max flow capacity.
+   Adjust max-flow setting to match your valve/pipe sizing.
+
+6. HIGH EFFICIENCY
+   Enable efficiency-priority for MP Rotators and similar nozzles.
+   These have matched precipitation rates (~10 mm/hr).
+
+
+================================================================================
+                          TROUBLESHOOTING
+================================================================================
+
+ERROR: "No valid area selected"
+- Make sure you selected a CLOSED polyline
+- Use PEDIT > Close to close open polylines
+
+ERROR: "Cannot find module"  
+- Check that all .lsp files are in the lisp folder
+- Verify the path in qtech-irrigation.lsp
+
+ERROR: "No suitable nozzle found"
+- Adjust the target radius or pressure settings
+- Check that catalogue data is loaded (view QIRRCATALOGUE)
+
+SLOW PERFORMANCE
+- Large areas may take longer to optimize
+- Increase grid-resolution setting (e.g., 0.8 instead of 0.5)
+- Reduce the area or break into smaller zones
+
+PATTERNS NOT SHOWING
+- Check that IRR-PATTERN layer is on and thawed
+- Run QIRRPATTERN again after changes
+
+
+================================================================================
+                             SUPPORT
+================================================================================
+
+For support, feature requests, or bug reports:
+- Email: info@qtech.hr
+- Web: www.qtech.hr
+
+================================================================================
+              Thank you for using QTech Design 2026 - Irrigation!
+       The World's Most Advanced Irrigation Planner for AutoCAD
+================================================================================
+

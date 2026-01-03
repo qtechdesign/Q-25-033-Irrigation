@@ -1,0 +1,63 @@
+brand,model,nozzle,radius_m,flow_m3h,precip_mmhr,pressure_bar,arc_options,efficiency
+Hunter,PGP-ADJ,1.0,4.9,0.10,13.0,3.5,"50,360",standard
+Hunter,PGP-ADJ,1.5,5.8,0.14,14.0,3.5,"50,360",standard
+Hunter,PGP-ADJ,2.0,6.7,0.17,15.0,3.5,"50,360",standard
+Hunter,PGP-ADJ,3.0,8.2,0.27,16.0,3.5,"50,360",standard
+Hunter,PGP-ADJ,4.0,9.4,0.38,17.0,3.5,"50,360",standard
+Hunter,PGP-ADJ,5.0,10.4,0.50,18.0,3.5,"50,360",standard
+Hunter,PGP-ADJ,6.0,11.6,0.65,20.0,3.5,"50,360",standard
+Hunter,PGP-ADJ,8.0,13.1,0.91,22.0,3.5,"50,360",standard
+Hunter,PGJ,Red,5.2,0.12,14.0,2.8,"50,360",standard
+Hunter,PGJ,Green,6.4,0.17,15.0,2.8,"50,360",standard
+Hunter,PGJ,Black,7.6,0.23,16.0,2.8,"50,360",standard
+Hunter,PGJ,Gray,8.5,0.30,17.0,2.8,"50,360",standard
+Hunter,MP Rotator,MP1000-90,3.5,0.04,10.0,2.8,"90",high
+Hunter,MP Rotator,MP1000-180,3.5,0.04,10.0,2.8,"180",high
+Hunter,MP Rotator,MP1000-210,3.5,0.04,10.0,2.8,"210",high
+Hunter,MP Rotator,MP1000-360,3.5,0.04,10.0,2.8,"360",high
+Hunter,MP Rotator,MP2000-90,5.2,0.07,10.0,2.8,"90",high
+Hunter,MP Rotator,MP2000-180,5.2,0.07,10.0,2.8,"180",high
+Hunter,MP Rotator,MP2000-210,5.2,0.07,10.0,2.8,"210",high
+Hunter,MP Rotator,MP2000-360,5.2,0.07,10.0,2.8,"360",high
+Hunter,MP Rotator,MP3000-90,7.8,0.11,10.0,2.8,"90",high
+Hunter,MP Rotator,MP3000-180,7.8,0.11,10.0,2.8,"180",high
+Hunter,MP Rotator,MP3000-210,7.8,0.11,10.0,2.8,"210",high
+Hunter,MP Rotator,MP3000-360,7.8,0.11,10.0,2.8,"360",high
+Hunter,MP Rotator,MP3500-90,10.0,0.14,10.0,2.8,"90",high
+Hunter,MP Rotator,MP3500-180,10.0,0.14,10.0,2.8,"180",high
+Hunter,MP Rotator,MP3500-210,10.0,0.14,10.0,2.8,"210",high
+Hunter,MP Rotator,MP3500-360,10.0,0.14,10.0,2.8,"360",high
+Hunter,MP Rotator,MPSS530,3.0,0.05,10.0,2.8,"180",high
+Hunter,MP Rotator,MPLCS515,3.0,0.04,10.0,2.8,"180",high
+Hunter,MP Rotator,MPRCS515,3.0,0.04,10.0,2.8,"180",high
+Hunter,MP Rotator,MP Corner,2.7,0.03,10.0,2.8,"90",high
+Hunter,Pro-Spray,4A,1.2,0.02,38.0,2.1,"360",standard
+Hunter,Pro-Spray,6A,1.8,0.03,40.0,2.1,"360",standard
+Hunter,Pro-Spray,8A,2.4,0.05,42.0,2.1,"360",standard
+Hunter,Pro-Spray,10A,3.0,0.08,44.0,2.1,"360",standard
+Hunter,Pro-Spray,12A,3.7,0.11,46.0,2.1,"360",standard
+Hunter,Pro-Spray,15A,4.6,0.15,48.0,2.1,"360",standard
+Hunter,Pro-Spray,4Q,1.2,0.005,38.0,2.1,"90",standard
+Hunter,Pro-Spray,6Q,1.8,0.008,40.0,2.1,"90",standard
+Hunter,Pro-Spray,8Q,2.4,0.013,42.0,2.1,"90",standard
+Hunter,Pro-Spray,4H,1.2,0.01,38.0,2.1,"180",standard
+Hunter,Pro-Spray,6H,1.8,0.015,40.0,2.1,"180",standard
+Hunter,Pro-Spray,8H,2.4,0.025,42.0,2.1,"180",standard
+Hunter,I-20,Blue,8.5,0.25,14.0,3.5,"50,360",standard
+Hunter,I-20,Green,10.1,0.36,15.0,3.5,"50,360",standard
+Hunter,I-20,Yellow,11.6,0.48,16.0,3.5,"50,360",standard
+Hunter,I-20,Red,13.1,0.63,17.0,3.5,"50,360",standard
+Hunter,I-20,Gray,14.3,0.80,18.0,3.5,"50,360",standard
+Hunter,I-20,Black,15.5,1.00,19.0,3.5,"50,360",standard
+Hunter,I-25,Green,15.2,0.68,14.0,4.1,"50,360",standard
+Hunter,I-25,Yellow,17.1,0.91,15.0,4.1,"50,360",standard
+Hunter,I-25,Red,19.2,1.14,16.0,4.1,"50,360",standard
+Hunter,I-25,Gray,20.7,1.36,17.0,4.1,"50,360",standard
+Hunter,I-25,Black,22.6,1.59,18.0,4.1,"50,360",standard
+Hunter,I-40,05,12.8,0.35,17.0,4.5,"50,360",standard
+Hunter,I-40,10,15.5,0.51,17.0,4.5,"50,360",standard
+Hunter,I-40,15,18.0,0.72,17.0,4.5,"50,360",standard
+Hunter,I-40,20,19.8,0.91,17.0,4.5,"50,360",standard
+Hunter,I-40,25,21.3,1.14,17.0,4.5,"50,360",standard
+Hunter,I-40,30,22.9,1.36,17.0,4.5,"50,360",standard
+
