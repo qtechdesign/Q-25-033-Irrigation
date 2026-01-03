@@ -66,7 +66,7 @@ Perfect for landscape architects, irrigation designers, and civil engineers who 
 
 1. **Download** or clone this repository:
    ```bash
-   git clone https://github.com/qtech-hr/qirri.git
+   git clone https://github.com/qtechdesign/Q-25-033-Irrigation.git
    ```
 
 2. **Copy** the folder to your preferred location:
