@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --accent: #22c55e;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Canvas styles */
+.canvas-container {
+  background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
+  border: 1px solid #333;
+  border-radius: 8px;
+}
+
+/* Button styles */
+.btn-primary {
+  @apply bg-qirri-600 hover:bg-qirri-500 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+}
+
+.btn-secondary {
+  @apply bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+}
+
+/* Card styles */
+.card {
+  @apply bg-gray-900 border border-gray-800 rounded-xl p-4;
+}
+
+/* Input styles */
+.input {
+  @apply bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-qirri-500 focus:outline-none;
+}
+
+/* Stats */
+.stat-good {
+  @apply text-green-400;
+}
+
+.stat-warning {
+  @apply text-yellow-400;
+}
+
+.stat-bad {
+  @apply text-red-400;
+}
+

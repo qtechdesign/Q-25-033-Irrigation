@@ -1,0 +1,12 @@
+name = "qirri-api"
+main = "index.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+ENVIRONMENT = "production"
+
+# Uncomment when you have Supabase set up
+# [env.production.vars]
+# SUPABASE_URL = ""
+# SUPABASE_ANON_KEY = ""
+
