@@ -1,7 +1,7 @@
 ;;; ============================================================================
 ;;; QIRRI - Simulation Grid & Uniformity Analysis
 ;;; Grid-based coverage simulation with CU/DU calculations
-;;; Now with UNIT-AWARE grid resolution
+;;; OPTIMIZED for speed with progress indicators
 ;;; Copyright (c) 2026 QTech Design - www.qtech.hr
 ;;; ============================================================================
 
@@ -10,16 +10,17 @@
 ;;; ----------------------------------------------------------------------------
 
 (setq *qtech-grid* nil)              ; List of grid points ((x y precip) ...)
-(setq *qtech-grid-resolution* 0.5)   ; Grid spacing in METERS (will be converted)
+(setq *qtech-grid-resolution* 1.0)   ; Grid spacing in METERS (1m default for speed)
 (setq *qtech-sim-results* nil)       ; Last simulation results
 
 ;;; ----------------------------------------------------------------------------
-;;; Grid Generation - UNIT AWARE
+;;; Grid Generation - OPTIMIZED
 ;;; ----------------------------------------------------------------------------
 
 (defun qtech:generate-simulation-grid (vertices resolution-meters / bounds grid pts 
-                                        resolution-dwg width height num-x num-y max-pts)
-  "Generate dense simulation grid inside polygon (resolution in METERS)"
+                                        resolution-dwg width height num-x num-y max-pts
+                                        total-candidate)
+  "Generate simulation grid inside polygon (resolution in METERS)"
   
   ;; Ensure units are detected
   (if (not *qirri-scale-factor*) (qtech:detect-units))
@@ -30,56 +31,100 @@
   (setq *qtech-grid-resolution* resolution-meters)
   (setq bounds (qtech:pline-bounds vertices))
   
-  ;; Calculate grid dimensions for progress reporting
+  ;; Calculate grid dimensions
   (setq width (- (caadr bounds) (caar bounds)))
   (setq height (- (cadadr bounds) (cadar bounds)))
   (setq num-x (fix (/ width resolution-dwg)))
   (setq num-y (fix (/ height resolution-dwg)))
+  (setq total-candidate (* num-x num-y))
   
-  (princ (strcat "\n\nGenerating simulation grid..."))
-  (princ (strcat "\n  Resolution: " (rtos resolution-meters 2 2) " m"
+  (princ "\n\n=== SIMULATION GRID ===")
+  (princ (strcat "\nResolution: " (rtos resolution-meters 2 2) " m"
                  " = " (rtos resolution-dwg 2 1) " " *qirri-units*))
-  (princ (strcat "\n  Bounding box: " (rtos (qtech:to-meters width) 2 2) " x " 
+  (princ (strcat "\nArea size: " (rtos (qtech:to-meters width) 2 2) " x " 
                  (rtos (qtech:to-meters height) 2 2) " m"))
-  (princ (strcat "\n  Estimated grid: " (itoa num-x) " x " (itoa num-y) 
-                 " = ~" (itoa (* num-x num-y)) " points"))
+  (princ (strcat "\nGrid estimate: " (itoa num-x) " x " (itoa num-y) 
+                 " = " (itoa total-candidate) " points"))
   
-  ;; Warn if grid is too large
-  (setq max-pts 50000)
-  (if (> (* num-x num-y) max-pts)
+  ;; STRICT limit - 10k points max for responsiveness
+  (setq max-pts 10000)
+  (if (> total-candidate max-pts)
     (progn
-      (princ (strcat "\n\n*** WARNING: Grid too large (>" (itoa max-pts) " points)!"))
-      (princ "\n    Increasing resolution to reduce points...")
-      ;; Increase resolution to limit points
+      (princ (strcat "\n\n** Grid too large! Adjusting resolution..."))
+      ;; Calculate required resolution
       (while (> (* num-x num-y) max-pts)
         (setq resolution-meters (* resolution-meters 1.5))
         (setq resolution-dwg (qtech:from-meters resolution-meters))
         (setq num-x (fix (/ width resolution-dwg)))
         (setq num-y (fix (/ height resolution-dwg)))
       )
-      (princ (strcat "\n    New resolution: " (rtos resolution-meters 2 2) " m"))
+      (princ (strcat "\n   New resolution: " (rtos resolution-meters 2 2) " m"))
+      (princ (strcat "\n   New grid: " (itoa (* num-x num-y)) " points"))
       (setq *qtech-grid-resolution* resolution-meters)
     )
   )
   
-  (princ "\n  Generating points...")
+  (princ "\n\nGenerating grid points...")
   
-  ;; Generate candidate points
-  (setq pts (qtech:generate-grid bounds resolution-dwg))
-  
+  ;; Generate candidate points (fast)
+  (setq pts (qtech:generate-grid-fast bounds resolution-dwg))
   (princ (strcat " " (itoa (length pts)) " candidates"))
-  (princ "\n  Filtering to polygon...")
   
-  ;; Filter to points inside polygon
-  (setq grid (mapcar 
-    '(lambda (pt) 
-       (list (car pt) (cadr pt) 0.0))  ; (x y precip)
-    (qtech:filter-points-in-polygon pts vertices)
-  ))
+  (princ "\nFiltering to polygon (please wait)...")
   
-  (setq *qtech-grid* grid)
-  (princ (strcat " " (itoa (length grid)) " points inside polygon."))
-  grid
+  ;; Filter to points inside polygon (slower, show progress)
+  (setq grid (qtech:filter-points-in-polygon-progress pts vertices))
+  
+  ;; Add precipitation field
+  (setq *qtech-grid* (mapcar '(lambda (pt) (list (car pt) (cadr pt) 0.0)) grid))
+  
+  (princ (strcat "\nGrid ready: " (itoa (length *qtech-grid*)) " points inside polygon."))
+  *qtech-grid*
+)
+
+(defun qtech:generate-grid-fast (bounds resolution / minpt maxpt x y pts row-pts)
+  "Fast grid generation without append overhead"
+  (setq minpt (car bounds) maxpt (cadr bounds))
+  (setq pts '())
+  (setq y (cadr minpt))
+  (while (<= y (cadr maxpt))
+    (setq x (car minpt))
+    (setq row-pts '())
+    (while (<= x (car maxpt))
+      (setq row-pts (cons (list x y) row-pts))
+      (setq x (+ x resolution))
+    )
+    (setq pts (append (reverse row-pts) pts))
+    (setq y (+ y resolution))
+  )
+  (reverse pts)
+)
+
+(defun qtech:filter-points-in-polygon-progress (pts vertices / result count total pct last-pct)
+  "Filter points with progress indicator"
+  (setq result '())
+  (setq count 0)
+  (setq total (length pts))
+  (setq last-pct -1)
+  
+  (foreach pt pts
+    ;; Progress every 10%
+    (setq pct (fix (* 100 (/ (float count) total))))
+    (if (and (= (rem pct 10) 0) (/= pct last-pct))
+      (progn
+        (princ (strcat " " (itoa pct) "%"))
+        (setq last-pct pct)
+      )
+    )
+    
+    ;; Test point
+    (if (qtech:point-in-polygon pt vertices)
+      (setq result (cons pt result))
+    )
+    (setq count (1+ count))
+  )
+  (princ " 100%")
+  (reverse result)
 )
 
 (defun c:QIRRGRID (/ vertices res)
@@ -92,9 +137,9 @@
   
   ;; Ask for resolution
   (princ (strcat "\nCurrent resolution: " (rtos *qtech-grid-resolution* 2 2) " m"))
-  (setq res (getreal "\nEnter grid resolution in meters <0.5>: "))
-  (if (not res) (setq res 0.5))
-  (if (< res 0.1) (setq res 0.1))  ; Min 10cm
+  (setq res (getreal "\nEnter grid resolution in meters [1.0]: "))
+  (if (not res) (setq res 1.0))
+  (if (< res 0.25) (setq res 0.25))  ; Min 25cm
   
   ;; Generate grid
   (qtech:generate-simulation-grid vertices res)
@@ -103,15 +148,20 @@
     (progn
       ;; Draw grid points
       (qtech:set-layer "IRR-GRID")
-      (princ "\nDrawing grid...")
+      (princ "\nDrawing grid points...")
       (setvar "PDMODE" 3)
       (setvar "PDSIZE" (qtech:from-meters 0.1))
       
+      (setq count 0)
       (foreach gp *qtech-grid*
         (command "._POINT" (list (car gp) (cadr gp)))
+        (setq count (1+ count))
+        (if (= (rem count 500) 0)
+          (princ ".")
+        )
       )
       
-      (princ (strcat " " (itoa (length *qtech-grid*)) " points drawn.\n"))
+      (princ (strcat " Done! " (itoa (length *qtech-grid*)) " points.\n"))
     )
     (princ "\nNo grid points generated.")
   )
@@ -119,10 +169,10 @@
 )
 
 ;;; ----------------------------------------------------------------------------
-;;; Precipitation Simulation
+;;; Precipitation Simulation - SIMPLIFIED
 ;;; ----------------------------------------------------------------------------
 
-(defun qtech:simulate-coverage (heads / grid-copy)
+(defun qtech:simulate-coverage (heads / grid-copy count)
   "Simulate precipitation on grid from all heads"
   (if (not *qtech-grid*)
     (progn
@@ -135,6 +185,9 @@
     )
   )
   
+  (princ (strcat "\nSimulating " (itoa (length heads)) " heads on " 
+                 (itoa (length *qtech-grid*)) " grid points..."))
+  
   ;; Reset grid precipitation
   (setq grid-copy (mapcar 
     '(lambda (gp) (list (car gp) (cadr gp) 0.0))
@@ -142,60 +195,72 @@
   ))
   
   ;; Accumulate precipitation from each head
+  (setq count 0)
   (foreach head heads
-    (setq grid-copy (qtech:add-head-precipitation grid-copy head))
+    (setq grid-copy (qtech:add-head-precipitation-fast grid-copy head))
+    (setq count (1+ count))
+    (princ ".")
   )
   
   (setq *qtech-grid* grid-copy)
+  (princ " Done.")
   grid-copy
 )
 
-(defun qtech:add-head-precipitation (grid head / pos radius precip arc rotation radius-dwg)
-  "Add precipitation contribution from a single head to grid"
+(defun qtech:add-head-precipitation-fast (grid head / pos radius-m radius-dwg precip)
+  "Add precipitation - optimized version"
   (setq pos (cdr (assoc "position" head)))
-  (setq radius (cdr (assoc "radius" head)))    ; in meters
+  (setq radius-m (cdr (assoc "radius" head)))    ; in meters
+  (setq radius-dwg (qtech:from-meters radius-m))
   (setq precip (cdr (assoc "precip" head)))
   (setq arc (cdr (assoc "arc" head)))
   (setq rotation (cdr (assoc "rotation" head)))
   (if (not rotation) (setq rotation 0))
   
-  ;; Convert radius from meters to drawing units
-  (setq radius-dwg (qtech:from-meters radius))
+  ;; Pre-calculate squared radius for faster distance check
+  (setq radius-sq (* radius-dwg radius-dwg))
   
   (mapcar 
-    '(lambda (gp / pt dist contrib)
-       (setq pt (list (car gp) (cadr gp)))
-       (setq dist (qtech:distance-2d pt pos))
+    '(lambda (gp / dx dy dist-sq contrib)
+       (setq dx (- (car gp) (car pos)))
+       (setq dy (- (cadr gp) (cadr pos)))
+       (setq dist-sq (+ (* dx dx) (* dy dy)))
        
-       (if (and (<= dist radius-dwg)
-                (qtech:point-in-spray-arc pt pos arc rotation))
+       ;; Quick distance check (squared, no sqrt needed)
+       (if (and (<= dist-sq radius-sq)
+                (or (= arc 360)
+                    (qtech:point-in-spray-arc-fast (car gp) (cadr gp) pos arc rotation)))
          (progn
-           ;; Radial decay model: precip decreases quadratically
-           (setq contrib (* precip (- 1.0 (expt (/ dist radius-dwg) 2))))
+           ;; Radial decay
+           (setq contrib (* precip (- 1.0 (/ dist-sq radius-sq))))
            (list (car gp) (cadr gp) (+ (caddr gp) contrib))
          )
-         gp  ; No change if outside spray area
+         gp
        )
     )
     grid
   )
 )
 
-(defun qtech:point-in-spray-arc (pt center arc rotation / ang pt-ang half-arc 
-                                  start-ang end-ang)
-  "Check if point is within sprinkler spray arc"
+(defun qtech:point-in-spray-arc-fast (px py center arc rotation / pt-ang half-arc 
+                                       start-ang end-ang)
+  "Fast arc check"
   (if (= arc 360)
     T
     (progn
       (setq pt-ang (qtech:radians-to-degrees 
-                    (qtech:normalize-angle (qtech:angle-2d center pt))))
+                    (qtech:normalize-angle (atan (- py (cadr center)) (- px (car center))))))
       (setq half-arc (/ arc 2.0))
       (setq start-ang (qtech:normalize-angle-deg (- rotation half-arc)))
       (setq end-ang (qtech:normalize-angle-deg (+ rotation half-arc)))
-      
       (qtech:angle-in-range pt-ang start-ang end-ang)
     )
   )
+)
+
+(defun qtech:point-in-spray-arc (pt center arc rotation)
+  "Check if point is within sprinkler spray arc"
+  (qtech:point-in-spray-arc-fast (car pt) (cadr pt) center arc rotation)
 )
 
 (defun qtech:normalize-angle-deg (ang)
@@ -218,8 +283,10 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun qtech:calculate-uniformity (grid / precip-values n total avg deviations cu 
-                                    sorted low-quarter lq-count lq-sum du)
+                                    sorted low-quarter lq-count lq-sum du covered-count coverage)
   "Calculate CU and DU from grid precipitation data"
+  
+  (princ "\nCalculating uniformity...")
   
   ;; Extract non-zero precipitation values
   (setq precip-values (vl-remove-if 
@@ -229,7 +296,7 @@
   
   (if (not precip-values)
     (progn
-      (princ "\nNo precipitation data in grid.")
+      (princ " No precipitation data.")
       (list (cons "cu" 0) (cons "du" 0) (cons "coverage" 0))
     )
     (progn
@@ -237,21 +304,21 @@
       (setq total (apply '+ precip-values))
       (setq avg (/ total (float n)))
       
-      ;; Christiansen's Uniformity Coefficient (CU)
-      ;; CU = 100 * (1 - Σ|depth_i - avg| / (n * avg))
+      ;; CU
       (setq deviations (apply '+ (mapcar '(lambda (p) (abs (- p avg))) precip-values)))
       (setq cu (* 100.0 (- 1.0 (/ deviations (* n avg)))))
       
-      ;; Distribution Uniformity (DU) - Low Quarter Method
-      ;; DU = 100 * (low_quarter_avg / overall_avg)
+      ;; DU
       (setq sorted (vl-sort precip-values '<))
       (setq lq-count (max 1 (fix (/ n 4.0))))
       (setq lq-sum (apply '+ (qtech:list-take sorted lq-count)))
       (setq du (* 100.0 (/ (/ lq-sum lq-count) avg)))
       
-      ;; Coverage percentage
-      (setq covered-count (length (vl-remove-if '(lambda (gp) (<= (caddr gp) 0)) grid)))
+      ;; Coverage
+      (setq covered-count (length precip-values))
       (setq coverage (* 100.0 (/ (float covered-count) (length grid))))
+      
+      (princ " Done.")
       
       (list 
         (cons "cu" (qtech:clamp cu 0 100))
@@ -268,14 +335,13 @@
 )
 
 (defun c:QIRRVALIDATE (/ results cu du coverage)
-  "Validate current design - calculate and display uniformity metrics"
+  "Validate current design"
   
   (if (not *qtech-placements*)
-    (progn (princ "\nNo sprinklers placed.") (princ) (exit))
+    (progn (princ "\nNo sprinklers placed. Run QIRRPLACE first.") (princ) (exit))
   )
   
-  (princ "\n\n=== UNIFORMITY VALIDATION ===\n")
-  (princ "Simulating coverage...")
+  (princ "\n\n=== UNIFORMITY VALIDATION ===")
   
   ;; Run simulation
   (qtech:simulate-coverage *qtech-placements*)
@@ -288,154 +354,83 @@
   (setq du (cdr (assoc "du" results)))
   (setq coverage (cdr (assoc "coverage" results)))
   
-  ;; Display results
+  ;; Display
   (princ "\n")
-  (princ "+-------------------------------------------------------+\n")
-  (princ "|              UNIFORMITY ANALYSIS RESULTS              |\n")
-  (princ "+-------------------------------------------------------+\n")
-  (princ (strcat "|  Christiansen's Uniformity (CU): " 
-                 (qtech:string-pad (strcat (rtos cu 2 1) "%") 8 " ")
-                 (qtech:cu-rating cu) "    |\n"))
-  (princ (strcat "|  Distribution Uniformity (DU):   " 
-                 (qtech:string-pad (strcat (rtos du 2 1) "%") 8 " ")
-                 (qtech:du-rating du) "    |\n"))
-  (princ (strcat "|  Area Coverage:                  " 
-                 (qtech:string-pad (strcat (rtos coverage 2 1) "%") 8 " ")
-                 "             |\n"))
-  (princ "+-------------------------------------------------------+\n")
-  (princ (strcat "|  Average Precipitation: " 
-                 (qtech:string-pad (strcat (rtos (cdr (assoc "avg-precip" results)) 2 1) " mm/hr") 14 " ")
-                 "            |\n"))
-  (princ (strcat "|  Min Precipitation:     " 
-                 (qtech:string-pad (strcat (rtos (cdr (assoc "min-precip" results)) 2 1) " mm/hr") 14 " ")
-                 "            |\n"))
-  (princ (strcat "|  Max Precipitation:     " 
-                 (qtech:string-pad (strcat (rtos (cdr (assoc "max-precip" results)) 2 1) " mm/hr") 14 " ")
-                 "            |\n"))
-  (princ "+-------------------------------------------------------+\n")
-  (princ (strcat "|  Grid Points: " (itoa (cdr (assoc "grid-points" results)))
-                 "  |  Covered: " (itoa (cdr (assoc "covered-points" results)))
-                 "                    |\n"))
-  (princ "+-------------------------------------------------------+\n")
+  (princ "\n+------------------------------------------+")
+  (princ "\n|        UNIFORMITY RESULTS                |")
+  (princ "\n+------------------------------------------+")
+  (princ (strcat "\n|  CU: " (rtos cu 2 1) "% " (qtech:cu-rating cu)))
+  (princ (strcat "\n|  DU: " (rtos du 2 1) "% " (qtech:du-rating du)))
+  (princ (strcat "\n|  Coverage: " (rtos coverage 2 1) "%"))
+  (princ (strcat "\n|  Avg precip: " (rtos (cdr (assoc "avg-precip" results)) 2 1) " mm/hr"))
+  (princ "\n+------------------------------------------+")
   
-  ;; Recommendations
-  (if (< cu 90)
-    (princ "\n>> WARNING: CU below 90% target. Consider running QIRROPTIMIZE.\n")
-  )
-  (if (< du 85)
-    (princ "\n>> WARNING: DU below 85% target. Check for dry spots.\n")
-  )
-  (if (< coverage 95)
-    (princ "\n>> WARNING: Coverage below 95%. Add more heads or adjust spacing.\n")
+  (if (and (>= cu 90) (>= du 85))
+    (princ "\n\n>> PASS: Design meets targets!")
+    (princ "\n\n>> Consider running QIRROPTIMIZE")
   )
   
-  (if (and (>= cu 90) (>= du 85) (>= coverage 95))
-    (princ "\n>> Design meets all uniformity targets!\n")
-  )
-  
+  (princ "\n")
   (princ)
 )
 
 (defun qtech:cu-rating (cu)
-  "Get rating string for CU value"
-  (cond
-    ((>= cu 95) "EXCELLENT")
-    ((>= cu 90) "GOOD     ")
-    ((>= cu 85) "FAIR     ")
-    ((>= cu 80) "POOR     ")
-    (T          "CRITICAL ")
-  )
+  (cond ((>= cu 95) "EXCELLENT") ((>= cu 90) "GOOD") ((>= cu 85) "FAIR") (T "POOR"))
 )
 
 (defun qtech:du-rating (du)
-  "Get rating string for DU value"
-  (cond
-    ((>= du 90) "EXCELLENT")
-    ((>= du 85) "GOOD     ")
-    ((>= du 75) "FAIR     ")
-    ((>= du 65) "POOR     ")
-    (T          "CRITICAL ")
-  )
+  (cond ((>= du 90) "EXCELLENT") ((>= du 85) "GOOD") ((>= du 75) "FAIR") (T "POOR"))
 )
 
 ;;; ----------------------------------------------------------------------------
-;;; Coverage Heatmap Visualization
+;;; Coverage Heatmap - SIMPLIFIED
 ;;; ----------------------------------------------------------------------------
 
-(defun c:QIRRCOVERAGE (/ grid max-precip)
+(defun c:QIRRCOVERAGE (/ max-precip count)
   "Draw coverage heatmap"
   
   (if (not *qtech-grid*)
     (progn (princ "\nNo simulation data. Run QIRRVALIDATE first.") (princ) (exit))
   )
   
-  (princ "\nDrawing coverage heatmap...")
+  (princ "\nDrawing heatmap...")
   
-  ;; Find max precipitation for normalization
   (setq max-precip (apply 'max (mapcar 'caddr *qtech-grid*)))
   (if (<= max-precip 0) (setq max-precip 1.0))
   
   (setvar "PDMODE" 0)
   (setvar "PDSIZE" (qtech:from-meters (* *qtech-grid-resolution* 0.8)))
   
+  (setq count 0)
   (foreach gp *qtech-grid*
     (qtech:draw-coverage-point gp max-precip)
+    (setq count (1+ count))
+    (if (= (rem count 200) 0) (princ "."))
   )
-  
-  ;; Draw legend
-  (qtech:draw-coverage-legend max-precip)
   
   (princ " Done.\n")
   (princ)
 )
 
 (defun qtech:draw-coverage-point (gp max-precip / pt precip color)
-  "Draw a single coverage point with color coding"
   (setq pt (list (car gp) (cadr gp)))
   (setq precip (caddr gp))
   (setq color (qtech:precip-to-color precip max-precip))
-  
   (command "._COLOR" color)
   (command "._POINT" pt)
   (command "._COLOR" "BYLAYER")
 )
 
 (defun qtech:precip-to-color (precip max-precip / ratio)
-  "Convert precipitation value to AutoCAD color index"
   (setq ratio (/ precip max-precip))
   (cond
-    ((<= ratio 0.0)  252)   ; Dark gray - no coverage
-    ((<= ratio 0.2)  1)     ; Red - very low
-    ((<= ratio 0.4)  30)    ; Orange - low
-    ((<= ratio 0.6)  2)     ; Yellow - medium
-    ((<= ratio 0.8)  3)     ; Green - good
-    ((<= ratio 1.0)  4)     ; Cyan - optimal
-    (T               5)     ; Blue - over-watered
-  )
-)
-
-(defun qtech:draw-coverage-legend (max-precip / insert-pt y-off text-size)
-  "Draw coverage heatmap legend"
-  (setq insert-pt (getvar "VIEWCTR"))
-  (setq insert-pt (list (+ (car insert-pt) (qtech:from-meters 5)) 
-                        (+ (cadr insert-pt) (qtech:from-meters 3))))
-  (setq text-size (qtech:from-meters 0.3))
-  
-  (qtech:set-layer "IRR-TEXT")
-  (command "._TEXT" insert-pt text-size 0 "COVERAGE LEGEND")
-  
-  (setq y-off (qtech:from-meters -0.6))
-  (foreach item '((252 "No coverage") (1 "Critical (<20%)") (30 "Low (20-40%)")
-                  (2 "Medium (40-60%)") (3 "Good (60-80%)") (4 "Optimal (80-100%)")
-                  (5 "Over-watered (>100%)"))
-    (command "._COLOR" (car item))
-    (command "._CIRCLE" (list (car insert-pt) (+ (cadr insert-pt) y-off)) 
-             (qtech:from-meters 0.15))
-    (command "._COLOR" "BYLAYER")
-    (command "._TEXT" (list (+ (car insert-pt) (qtech:from-meters 0.4)) 
-                            (+ (cadr insert-pt) y-off (qtech:from-meters -0.1)))
-             (* text-size 0.7) 0 (cadr item))
-    (setq y-off (- y-off (qtech:from-meters 0.5)))
+    ((<= ratio 0.0)  252)
+    ((<= ratio 0.2)  1)
+    ((<= ratio 0.4)  30)
+    ((<= ratio 0.6)  2)
+    ((<= ratio 0.8)  3)
+    ((<= ratio 1.0)  4)
+    (T               5)
   )
 )
 
@@ -443,21 +438,13 @@
 ;;; Gap Analysis
 ;;; ----------------------------------------------------------------------------
 
-(defun qtech:find-coverage-gaps (grid threshold / gaps)
-  "Find grid points with coverage below threshold"
-  (setq gaps (vl-remove-if-not
-    '(lambda (gp) (< (caddr gp) threshold))
-    grid
-  ))
-  gaps
+(defun qtech:find-coverage-gaps (grid threshold)
+  (vl-remove-if-not '(lambda (gp) (< (caddr gp) threshold)) grid)
 )
 
-(defun qtech:find-largest-gap (gaps / clusters largest)
-  "Find the largest continuous gap region"
-  (if (not gaps)
-    nil
+(defun qtech:find-largest-gap (gaps / cx cy)
+  (if gaps
     (progn
-      ;; Simple approach: find centroid of gap points
       (setq cx (qtech:list-avg (mapcar 'car gaps)))
       (setq cy (qtech:list-avg (mapcar 'cadr gaps)))
       (list cx cy (length gaps))
@@ -466,43 +453,12 @@
 )
 
 (defun qtech:calculate-gap-score (position gaps radius)
-  "Calculate how many gap points would be covered by placing head at position"
   (length (vl-remove-if-not
-    '(lambda (gp)
-       (<= (qtech:distance-2d position (list (car gp) (cadr gp))) radius))
+    '(lambda (gp) (<= (qtech:distance-2d position (list (car gp) (cadr gp))) radius))
     gaps
   ))
 )
 
-;;; ----------------------------------------------------------------------------
-;;; Target Precipitation Analysis
-;;; ----------------------------------------------------------------------------
-
-(defun qtech:analyze-precip-match (grid target-precip tolerance / in-range low high)
-  "Analyze how well precipitation matches target"
-  (setq in-range 0 low 0 high 0)
-  (setq min-ok (* target-precip (- 1.0 tolerance)))
-  (setq max-ok (* target-precip (+ 1.0 tolerance)))
-  
-  (foreach gp grid
-    (setq p (caddr gp))
-    (cond
-      ((< p min-ok) (setq low (1+ low)))
-      ((> p max-ok) (setq high (1+ high)))
-      (T (setq in-range (1+ in-range)))
-    )
-  )
-  
-  (list 
-    (cons "in-range" in-range)
-    (cons "under" low)
-    (cons "over" high)
-    (cons "match-pct" (* 100.0 (/ (float in-range) (length grid))))
-  )
-)
-
-;;; ============================================================================
-;;; End of qirri-simulation.lsp
 ;;; ============================================================================
 
 (princ "\n  qirri-simulation.lsp loaded")
