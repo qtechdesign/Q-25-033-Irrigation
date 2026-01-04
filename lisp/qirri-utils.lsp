@@ -5,6 +5,153 @@
 ;;; ============================================================================
 
 ;;; ----------------------------------------------------------------------------
+;;; UNIT DETECTION & CONVERSION
+;;; ----------------------------------------------------------------------------
+
+(setq *qirri-units* nil)           ; Detected units ("mm", "cm", "m", "in", "ft")
+(setq *qirri-scale-factor* 1.0)    ; Scale to convert drawing units to meters
+
+(defun qtech:detect-units (/ insunits lunits)
+  "Detect drawing units and set scale factor"
+  (setq insunits (getvar "INSUNITS"))
+  (setq lunits (getvar "LUNITS"))
+  
+  ;; INSUNITS values:
+  ;; 0 = Unitless, 1 = Inches, 2 = Feet, 3 = Miles
+  ;; 4 = Millimeters, 5 = Centimeters, 6 = Meters, 7 = Kilometers
+  
+  (cond
+    ((= insunits 1)  ; Inches
+     (setq *qirri-units* "in")
+     (setq *qirri-scale-factor* 0.0254))    ; 1 inch = 0.0254 m
+    ((= insunits 2)  ; Feet
+     (setq *qirri-units* "ft")
+     (setq *qirri-scale-factor* 0.3048))    ; 1 foot = 0.3048 m
+    ((= insunits 4)  ; Millimeters
+     (setq *qirri-units* "mm")
+     (setq *qirri-scale-factor* 0.001))     ; 1 mm = 0.001 m
+    ((= insunits 5)  ; Centimeters
+     (setq *qirri-units* "cm")
+     (setq *qirri-scale-factor* 0.01))      ; 1 cm = 0.01 m
+    ((= insunits 6)  ; Meters
+     (setq *qirri-units* "m")
+     (setq *qirri-scale-factor* 1.0))
+    ((= insunits 7)  ; Kilometers
+     (setq *qirri-units* "km")
+     (setq *qirri-scale-factor* 1000.0))
+    (T  ; Unitless or unknown - try to auto-detect from extents
+     (qtech:auto-detect-units))
+  )
+  
+  (princ (strcat "\nUnits detected: " *qirri-units* 
+                 " (scale factor: " (rtos *qirri-scale-factor* 2 6) ")"))
+  *qirri-scale-factor*
+)
+
+(defun qtech:auto-detect-units (/ ext-min ext-max width height max-dim)
+  "Try to guess units from drawing extents"
+  (setq ext-min (getvar "EXTMIN"))
+  (setq ext-max (getvar "EXTMAX"))
+  
+  (if (and ext-min ext-max)
+    (progn
+      (setq width (- (car ext-max) (car ext-min)))
+      (setq height (- (cadr ext-max) (cadr ext-min)))
+      (setq max-dim (max width height))
+      
+      (cond
+        ;; If max dimension > 1000, likely millimeters
+        ((> max-dim 1000)
+         (setq *qirri-units* "mm")
+         (setq *qirri-scale-factor* 0.001)
+         (princ "\nAuto-detected: Millimeters (extents > 1000)"))
+        ;; If max dimension > 100, likely centimeters
+        ((> max-dim 100)
+         (setq *qirri-units* "cm")
+         (setq *qirri-scale-factor* 0.01)
+         (princ "\nAuto-detected: Centimeters (extents > 100)"))
+        ;; Otherwise, assume meters
+        (T
+         (setq *qirri-units* "m")
+         (setq *qirri-scale-factor* 1.0)
+         (princ "\nAuto-detected: Meters"))
+      )
+    )
+    ;; Can't detect - default to meters
+    (progn
+      (setq *qirri-units* "m")
+      (setq *qirri-scale-factor* 1.0)
+    )
+  )
+)
+
+(defun qtech:to-meters (value)
+  "Convert drawing units to meters"
+  (* value *qirri-scale-factor*)
+)
+
+(defun qtech:from-meters (value)
+  "Convert meters to drawing units"
+  (/ value *qirri-scale-factor*)
+)
+
+(defun qtech:format-area (area-sq-drawing-units / area-m2)
+  "Format area in appropriate units"
+  (setq area-m2 (* area-sq-drawing-units (* *qirri-scale-factor* *qirri-scale-factor*)))
+  (cond
+    ((>= area-m2 10000)
+     (strcat (rtos (/ area-m2 10000.0) 2 2) " ha"))
+    (T
+     (strcat (rtos area-m2 2 1) " m²"))
+  )
+)
+
+(defun qtech:format-length (length-drawing-units / length-m)
+  "Format length in appropriate units"
+  (setq length-m (* length-drawing-units *qirri-scale-factor*))
+  (strcat (rtos length-m 2 2) " m")
+)
+
+(defun c:QIRRUNITS (/ choice)
+  "Set drawing units manually"
+  (princ "\n=== DRAWING UNITS ===")
+  (princ (strcat "\nCurrent: " (if *qirri-units* *qirri-units* "Not set")))
+  (princ (strcat " (scale: " (rtos *qirri-scale-factor* 2 6) ")"))
+  (princ "\n")
+  (princ "\n1. Millimeters (mm)")
+  (princ "\n2. Centimeters (cm)")
+  (princ "\n3. Meters (m)")
+  (princ "\n4. Inches (in)")
+  (princ "\n5. Feet (ft)")
+  (princ "\n6. Auto-detect")
+  (princ "\n")
+  
+  (setq choice (getstring "\nSelect [1-6]: "))
+  
+  (cond
+    ((= choice "1")
+     (setq *qirri-units* "mm" *qirri-scale-factor* 0.001))
+    ((= choice "2")
+     (setq *qirri-units* "cm" *qirri-scale-factor* 0.01))
+    ((= choice "3")
+     (setq *qirri-units* "m" *qirri-scale-factor* 1.0))
+    ((= choice "4")
+     (setq *qirri-units* "in" *qirri-scale-factor* 0.0254))
+    ((= choice "5")
+     (setq *qirri-units* "ft" *qirri-scale-factor* 0.3048))
+    ((= choice "6")
+     (qtech:detect-units))
+    (T (princ "\nCancelled."))
+  )
+  
+  (if *qirri-units*
+    (princ (strcat "\nUnits set to: " *qirri-units* 
+                   " (1 " *qirri-units* " = " (rtos *qirri-scale-factor* 2 6) " m)"))
+  )
+  (princ)
+)
+
+;;; ----------------------------------------------------------------------------
 ;;; Layer Management
 ;;; ----------------------------------------------------------------------------
 
@@ -406,6 +553,9 @@
 ;;; ============================================================================
 ;;; End of qirri-utils.lsp
 ;;; ============================================================================
+
+;; Auto-detect units when loaded
+(qtech:detect-units)
 
 (princ "\n  qirri-utils.lsp loaded")
 (princ)

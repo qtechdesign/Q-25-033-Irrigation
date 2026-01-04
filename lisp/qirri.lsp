@@ -50,6 +50,20 @@
 (setq *qtech-default-settings* *qirri-default-settings*)
 
 ;;; ----------------------------------------------------------------------------
+;;; Path Separator (Mac vs Windows)
+;;; ----------------------------------------------------------------------------
+
+(defun qirri:get-separator ()
+  "Get path separator for current OS"
+  (if (wcmatch (getvar "platform") "*Mac*")
+    "/"
+    "\\"
+  )
+)
+
+(defun qtech:get-separator () (qirri:get-separator))
+
+;;; ----------------------------------------------------------------------------
 ;;; Function Existence Check (Mac Compatible)
 ;;; ----------------------------------------------------------------------------
 
