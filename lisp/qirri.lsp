@@ -5,7 +5,10 @@
 ;;; Contact: info@qtech.hr | www.qtech.hr
 ;;; ============================================================================
 
-(vl-load-com)
+;;; Load COM support only on Windows (not available on Mac)
+(if (not (wcmatch (strcase (getvar "PLATFORM")) "*MAC*"))
+  (vl-load-com)
+)
 
 ;;; ----------------------------------------------------------------------------
 ;;; Global Variables
