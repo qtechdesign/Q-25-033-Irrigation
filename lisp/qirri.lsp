@@ -5,11 +5,6 @@
 ;;; Contact: info@qtech.hr | www.qtech.hr
 ;;; ============================================================================
 
-;;; Load COM support only on Windows (not available on Mac)
-(if (not (wcmatch (strcase (getvar "PLATFORM")) "*MAC*"))
-  (vl-load-com)
-)
-
 ;;; ----------------------------------------------------------------------------
 ;;; Global Variables
 ;;; ----------------------------------------------------------------------------
@@ -24,7 +19,7 @@
 (setq *qirri-grid* nil)
 (setq *qirri-sim-results* nil)
 
-;; Aliases for backward compatibility
+;; Aliases
 (setq *qtech-version* *qirri-version*)
 (setq *qtech-catalogue* nil)
 (setq *qtech-settings* nil)
@@ -55,61 +50,84 @@
 (setq *qtech-default-settings* *qirri-default-settings*)
 
 ;;; ----------------------------------------------------------------------------
-;;; Path Detection - Simple and Robust
+;;; Function Existence Check (Mac Compatible)
 ;;; ----------------------------------------------------------------------------
 
-(defun qirri:get-path (/ found-path)
-  "Get the Qirri installation path"
+(defun qirri:function-exists (func-name)
+  "Check if function exists - works on Mac and Windows"
+  (and (not (null func-name))
+       (or (and (boundp func-name) (eval func-name))
+           (not (null (eval (list 'quote func-name))))))
+)
+
+;;; ----------------------------------------------------------------------------
+;;; Path Setup - Ask User if Not Found
+;;; ----------------------------------------------------------------------------
+
+(defun qirri:setup-path (/ found-path user-path)
+  "Setup path - try findfile first, then ask user"
   (if *qirri-path*
     *qirri-path*
     (progn
+      ;; Try findfile
       (setq found-path (findfile "qirri.lsp"))
       (if found-path
+        (setq *qirri-path* (vl-filename-directory found-path))
         (progn
-          (setq *qirri-path* (vl-filename-directory found-path))
-          *qirri-path*
+          ;; Ask user for path
+          (princ "\nQirri path not found automatically.")
+          (princ "\nPlease enter the full path to the lisp folder")
+          (princ "\n(e.g., /Users/yourname/Qirri/lisp): ")
+          (setq user-path (getstring T))
+          (if (and user-path (/= user-path ""))
+            (setq *qirri-path* user-path)
+          )
         )
-        nil
       )
+      *qirri-path*
     )
   )
 )
 
-(defun qtech:get-path () (qirri:get-path))
+(defun qirri:get-path () *qirri-path*)
+(defun qtech:get-path () *qirri-path*)
 
 ;;; ----------------------------------------------------------------------------
-;;; Module Loading - Direct Approach
+;;; Module Loading
 ;;; ----------------------------------------------------------------------------
 
-(defun qirri:load-module (filename / full-path base-path)
-  "Load a Qirri module"
-  (setq base-path (qirri:get-path))
+(defun qirri:load-module (filename / full-path)
+  "Load a module"
+  (setq full-path nil)
   
-  (cond
-    ;; Try with base path + filename
-    ((and base-path 
-          (setq full-path (findfile (strcat base-path "/" filename))))
-     (load full-path)
-     (princ (strcat "\n  [OK] " filename))
-     T)
-    
-    ;; Try just the filename (if in search path)
-    ((setq full-path (findfile filename))
-     (load full-path)
-     (princ (strcat "\n  [OK] " filename " (from search path)"))
-     T)
-    
-    ;; Not found
-    (T
-     (princ (strcat "\n  [!!] NOT FOUND: " filename))
-     nil)
+  ;; Try with path
+  (if *qirri-path*
+    (setq full-path (findfile (strcat *qirri-path* "/" filename)))
+  )
+  
+  ;; Try just filename
+  (if (not full-path)
+    (setq full-path (findfile filename))
+  )
+  
+  ;; Load if found
+  (if full-path
+    (progn
+      (load full-path)
+      (princ (strcat "\n  [OK] " filename))
+      T
+    )
+    (progn
+      (princ (strcat "\n  [!!] NOT FOUND: " filename))
+      nil
+    )
   )
 )
 
 (defun qtech:load-module (f) (qirri:load-module f))
 
 (defun qirri:load-all-modules ()
-  "Load all Qirri modules"
+  "Load all modules"
   (princ "\n\nLoading modules...")
   (qirri:load-module "qirri-utils.lsp")
   (qirri:load-module "qirri-catalogue.lsp")
@@ -126,29 +144,24 @@
 (defun qtech:load-all-modules () (qirri:load-all-modules))
 
 ;;; ----------------------------------------------------------------------------
-;;; Utility Functions (defined here so commands work even if utils fails)
+;;; Utility Functions (so menu works even without modules)
 ;;; ----------------------------------------------------------------------------
 
 (defun qirri:copy-alist (alist)
-  "Copy association list"
   (mapcar '(lambda (p) (cons (car p) (cdr p))) alist)
 )
-
 (defun qtech:copy-alist (a) (qirri:copy-alist a))
 
 (defun qirri:string-pad (str len pad-char / result)
-  "Pad string to length"
   (setq result str)
   (while (< (strlen result) len)
     (setq result (strcat result pad-char))
   )
   result
 )
-
 (defun qtech:string-pad (s l p) (qirri:string-pad s l p))
 
 (defun qirri:value-to-string (val)
-  "Value to string"
   (cond
     ((= (type val) 'REAL) (rtos val 2 2))
     ((= (type val) 'INT) (itoa val))
@@ -158,11 +171,9 @@
     (T (vl-princ-to-string val))
   )
 )
-
 (defun qtech:value-to-string (v) (qirri:value-to-string v))
 
 (defun qirri:parse-value (str old-val)
-  "Parse string value"
   (cond
     ((= (type old-val) 'REAL) (atof str))
     ((= (type old-val) 'INT) (atoi str))
@@ -172,53 +183,59 @@
     (T str)
   )
 )
-
 (defun qtech:parse-value (s o) (qirri:parse-value s o))
 
 ;;; ----------------------------------------------------------------------------
-;;; MAIN MENU COMMAND - QIRR
+;;; MAIN MENU - QIRR
 ;;; ----------------------------------------------------------------------------
 
 (defun c:QIRR (/ choice)
-  "Main Qirri menu - type QIRR to start"
+  "Main menu"
   (qirri:print-menu)
-  (initget "1 2 3 4 5 6 7 8 9 A B C S K Q")
   (setq choice (strcase (getstring "\nEnter option: ")))
   (cond
-    ((= choice "1") (if (fboundp 'c:QIRRAREA) (c:QIRRAREA) (princ "\nModule not loaded.")))
-    ((= choice "2") (if (fboundp 'c:QIRRPLACE) (c:QIRRPLACE) (princ "\nModule not loaded.")))
-    ((= choice "3") (if (fboundp 'c:QIRROPTIMIZE) (c:QIRROPTIMIZE) (princ "\nModule not loaded.")))
+    ((= choice "1") (qirri:run-if-exists 'c:QIRRAREA))
+    ((= choice "2") (qirri:run-if-exists 'c:QIRRPLACE))
+    ((= choice "3") (qirri:run-if-exists 'c:QIRROPTIMIZE))
     ((= choice "4") (c:QIRRFULL))
-    ((= choice "5") (if (fboundp 'c:QIRRMANUAL) (c:QIRRMANUAL) (princ "\nModule not loaded.")))
-    ((= choice "6") (if (fboundp 'c:QIRRPATTERN) (c:QIRRPATTERN) (princ "\nModule not loaded.")))
-    ((= choice "7") (if (fboundp 'c:QIRRVALIDATE) (c:QIRRVALIDATE) (princ "\nModule not loaded.")))
-    ((= choice "8") (if (fboundp 'c:QIRRCOVERAGE) (c:QIRRCOVERAGE) (princ "\nModule not loaded.")))
-    ((= choice "9") (if (fboundp 'c:QIRRZONE) (c:QIRRZONE) (princ "\nModule not loaded.")))
-    ((= choice "A") (if (fboundp 'c:QIRRBOQ) (c:QIRRBOQ) (princ "\nModule not loaded.")))
-    ((= choice "B") (if (fboundp 'c:QIRRSAVINGS) (c:QIRRSAVINGS) (princ "\nModule not loaded.")))
-    ((= choice "C") (if (fboundp 'c:QIRREXPORT) (c:QIRREXPORT) (princ "\nModule not loaded.")))
+    ((= choice "5") (qirri:run-if-exists 'c:QIRRMANUAL))
+    ((= choice "6") (qirri:run-if-exists 'c:QIRRPATTERN))
+    ((= choice "7") (qirri:run-if-exists 'c:QIRRVALIDATE))
+    ((= choice "8") (qirri:run-if-exists 'c:QIRRCOVERAGE))
+    ((= choice "9") (qirri:run-if-exists 'c:QIRRZONE))
+    ((= choice "A") (qirri:run-if-exists 'c:QIRRBOQ))
+    ((= choice "B") (qirri:run-if-exists 'c:QIRRSAVINGS))
+    ((= choice "C") (qirri:run-if-exists 'c:QIRREXPORT))
     ((= choice "S") (c:QIRRSETTINGS))
-    ((= choice "K") (if (fboundp 'c:QIRRCATALOGUE) (c:QIRRCATALOGUE) (princ "\nModule not loaded.")))
+    ((= choice "K") (qirri:run-if-exists 'c:QIRRCATALOGUE))
     ((or (= choice "Q") (= choice "")) (princ "\nGoodbye!"))
     (T (princ "\nInvalid option."))
   )
   (princ)
 )
 
+(defun qirri:run-if-exists (func-sym / func)
+  "Run function if it exists"
+  (setq func (eval func-sym))
+  (if func
+    (func)
+    (princ "\nModule not loaded. Run QIRRSETPATH first.")
+  )
+)
+
 (defun c:QIRRFULL ()
   "Full optimization"
   (princ "\n=== FULL AUTO OPTIMIZATION ===\n")
-  (if (fboundp 'c:QIRRPLACE)
+  (if (eval 'c:QIRRPLACE)
     (progn
       (princ "\nPhase 1: Greedy placement...")
       (c:QIRRPLACE)
-      (if (fboundp 'c:QIRROPTIMIZE)
+      (if (eval 'c:QIRROPTIMIZE)
         (progn
           (princ "\nPhase 2: GA optimization...")
           (c:QIRROPTIMIZE)
         )
       )
-      (princ "\nDone.")
     )
     (princ "\nModules not loaded.")
   )
@@ -230,7 +247,6 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun qirri:print-menu ()
-  "Display menu"
   (princ "\n")
   (princ "+--------------------------------------------+\n")
   (princ "|          QIRRI - MAIN MENU                 |\n")
@@ -257,16 +273,37 @@
 (defun qtech:print-menu () (qirri:print-menu))
 
 ;;; ----------------------------------------------------------------------------
+;;; Set Path Command
+;;; ----------------------------------------------------------------------------
+
+(defun c:QIRRSETPATH (/ new-path)
+  "Set Qirri path manually"
+  (princ "\nCurrent path: ")
+  (princ (if *qirri-path* *qirri-path* "Not set"))
+  (princ "\n\nEnter full path to lisp folder: ")
+  (setq new-path (getstring T))
+  (if (and new-path (/= new-path ""))
+    (progn
+      (setq *qirri-path* new-path)
+      (princ (strcat "\nPath set to: " *qirri-path*))
+      (princ "\n\nReloading modules...")
+      (qirri:load-all-modules)
+    )
+    (princ "\nCancelled.")
+  )
+  (princ)
+)
+
+;;; ----------------------------------------------------------------------------
 ;;; Settings
 ;;; ----------------------------------------------------------------------------
 
 (defun c:QIRRSETTINGS (/ key val)
-  "Settings"
   (princ "\n=== SETTINGS ===\n")
   (foreach pair *qirri-settings*
     (princ (strcat "  " (car pair) ": " (qirri:value-to-string (cdr pair)) "\n"))
   )
-  (princ "\nEnter setting name to change (ENTER to exit): ")
+  (princ "\nEnter setting name (ENTER to exit): ")
   (setq key (getstring))
   (if (and key (/= key ""))
     (if (assoc key *qirri-settings*)
@@ -286,7 +323,7 @@
         )
         (c:QIRRSETTINGS)
       )
-      (progn (princ "\nUnknown setting.") (c:QIRRSETTINGS))
+      (progn (princ "\nUnknown.") (c:QIRRSETTINGS))
     )
   )
   (princ)
@@ -297,27 +334,24 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun c:QIRRHELP ()
-  "Help"
-  (princ "\n")
-  (princ "=== QIRRI COMMANDS ===\n")
+  (princ "\n=== QIRRI COMMANDS ===\n")
   (princ "  QIRR          - Main menu\n")
-  (princ "  QIRRAREA      - Select irrigation area\n")
+  (princ "  QIRRSETPATH   - Set path to modules\n")
+  (princ "  QIRRAREA      - Select area\n")
   (princ "  QIRRPLACE     - Auto placement\n")
   (princ "  QIRROPTIMIZE  - GA optimization\n")
   (princ "  QIRRFULL      - Full auto\n")
   (princ "  QIRRMANUAL    - Manual placement\n")
-  (princ "  QIRRPATTERN   - Draw patterns\n")
+  (princ "  QIRRPATTERN   - Patterns\n")
   (princ "  QIRRVALIDATE  - CU/DU check\n")
   (princ "  QIRRCOVERAGE  - Heatmap\n")
   (princ "  QIRRZONE      - Zones\n")
-  (princ "  QIRRBOQ       - Bill of quantities\n")
+  (princ "  QIRRBOQ       - BOQ\n")
   (princ "  QIRRSAVINGS   - Water savings\n")
-  (princ "  QIRREXPORT    - Export CSV\n")
+  (princ "  QIRREXPORT    - Export\n")
   (princ "  QIRRSETTINGS  - Settings\n")
-  (princ "  QIRRCATALOGUE - Sprinklers\n")
-  (princ "  QIRRHELP      - This help\n")
-  (princ "  QIRRVERSION   - Version info\n")
-  (princ "\nContact: info@qtech.hr | www.qtech.hr\n")
+  (princ "  QIRRCATALOGUE - Catalogue\n")
+  (princ "\nwww.qtech.hr\n")
   (princ)
 )
 
@@ -326,14 +360,10 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun c:QIRRVERSION ()
-  "Version"
-  (princ "\n")
-  (princ "===========================================\n")
-  (princ "  QIRRI - Intelligent Irrigation Planner\n")
-  (princ (strcat "  Version " *qirri-version* "\n"))
-  (princ "  Copyright 2026 QTech Design\n")
-  (princ "  info@qtech.hr | www.qtech.hr\n")
-  (princ "===========================================\n")
+  (princ "\n=== QIRRI ===\n")
+  (princ (strcat "Version " *qirri-version* "\n"))
+  (princ "QTech Design 2026\n")
+  (princ "www.qtech.hr\n")
   (princ)
 )
 
@@ -342,7 +372,6 @@
 ;;; ----------------------------------------------------------------------------
 
 (defun qirri:initialize ()
-  "Initialize Qirri"
   (princ "\n")
   (princ "============================================\n")
   (princ "  QIRRI - Intelligent Irrigation Planner\n")
@@ -354,31 +383,37 @@
   (setq *qirri-settings* (qirri:copy-alist *qirri-default-settings*))
   (setq *qtech-settings* *qirri-settings*)
   
-  ;; Show path
-  (princ (strcat "\nPath: " (if (qirri:get-path) (qirri:get-path) "Not found") "\n"))
+  ;; Setup path
+  (qirri:setup-path)
+  (princ (strcat "\nPath: " (if *qirri-path* *qirri-path* "Not set")))
   
-  ;; Load modules
-  (qirri:load-all-modules)
-  
-  ;; Create layers if utils loaded
-  (if (fboundp 'qtech:create-layers)
-    (qtech:create-layers)
-  )
-  
-  ;; Load catalogue if available
-  (if (fboundp 'qtech:load-catalogue)
+  ;; Load modules if path exists
+  (if *qirri-path*
     (progn
-      (qtech:load-catalogue)
-      (setq *qtech-catalogue* *qirri-catalogue*)
-      (if *qirri-catalogue*
-        (princ (strcat "\nCatalogue: " (itoa (length *qirri-catalogue*)) " sprinklers"))
+      (qirri:load-all-modules)
+      
+      ;; Create layers
+      (if (eval 'qtech:create-layers)
+        (qtech:create-layers)
+      )
+      
+      ;; Load catalogue
+      (if (eval 'qtech:load-catalogue)
+        (progn
+          (qtech:load-catalogue)
+          (setq *qtech-catalogue* *qirri-catalogue*)
+          (if *qirri-catalogue*
+            (princ (strcat "\nCatalogue: " (itoa (length *qirri-catalogue*)) " sprinklers"))
+          )
+        )
       )
     )
+    (princ "\n\n** Run QIRRSETPATH to set the path and load modules **")
   )
   
   (princ "\n\n============================================\n")
   (princ "  Type QIRR to start\n")
-  (princ "  Type QIRRHELP for commands\n")
+  (princ "  Type QIRRSETPATH if modules failed\n")
   (princ "============================================\n")
   (princ)
 )
@@ -386,11 +421,9 @@
 (defun qtech:initialize () (qirri:initialize))
 
 ;;; ----------------------------------------------------------------------------
-;;; Auto-run initialization
+;;; Auto-run
 ;;; ----------------------------------------------------------------------------
 
 (qirri:initialize)
 
-;;; ============================================================================
-;;; End of qirri.lsp
 ;;; ============================================================================
