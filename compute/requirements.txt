@@ -1,0 +1,24 @@
+# Qirri Compute Engine
+# Supports: CPU, CUDA GPU, Jetson Orin
+
+# Core
+numpy>=1.24.0
+scipy>=1.11.0
+
+# GPU Acceleration (optional - install based on platform)
+# For NVIDIA GPU (desktop/server):
+#   pip install cupy-cuda12x
+# For Jetson Orin:
+#   pip install cupy  (use JetPack's CUDA)
+
+# API Server (optional)
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.5.0
+
+# Modal.com deployment (optional)
+# modal>=0.56.0
+
+# Development
+pytest>=7.4.0
+
